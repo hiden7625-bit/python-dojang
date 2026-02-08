@@ -130,6 +130,29 @@ body{min-height:100vh;min-height:100dvh;background:linear-gradient(160deg,#0a0e1
 .nav-btns{display:flex;gap:10px;margin-top:16px}
 .nav-btn{flex:1;padding:12px;border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(255,255,255,.02);color:#7a8da3;font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:.2s}
 .nav-btn:disabled{color:#2d3748;cursor:default}
+/* === AI CHAT PANEL === */
+.btn-ask{flex:1;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;box-shadow:0 4px 16px rgba(124,58,237,.3);transition:all .2s ease}
+.btn-ask:hover{filter:brightness(1.15)}.btn-ask:active{transform:scale(.97)}
+.chat-panel{margin-top:12px;border-radius:14px;overflow:hidden;border:1px solid rgba(124,58,237,.2);background:rgba(124,58,237,.04);animation:slideDown .3s ease}
+.chat-header{padding:12px 16px;background:rgba(124,58,237,.1);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(124,58,237,.15)}
+.chat-header span{font-size:13px;font-weight:700;color:#a78bfa}
+.chat-close{background:none;border:none;color:#7c6aaa;font-size:16px;cursor:pointer;padding:4px 8px}
+.chat-messages{padding:12px 16px;max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.chat-msg{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.7;font-family:'Noto Sans KR',sans-serif;word-break:break-word;white-space:pre-wrap}
+.chat-msg.user{background:rgba(124,58,237,.15);color:#d4bfff;align-self:flex-end;max-width:85%;border-bottom-right-radius:4px}
+.chat-msg.ai{background:rgba(255,255,255,.05);color:#b0c4de;align-self:flex-start;max-width:90%;border-bottom-left-radius:4px}
+.chat-msg.ai code{background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;font-family:'Fira Code',monospace;font-size:12px;color:#a8e6a8}
+.chat-msg.thinking{color:#7c6aaa;font-style:italic}
+.chat-input-wrap{padding:10px 12px;border-top:1px solid rgba(124,58,237,.1);display:flex;gap:8px;align-items:center}
+.chat-input{flex:1;padding:10px 14px;border:1px solid rgba(124,58,237,.2);border-radius:10px;background:rgba(0,0,0,.2);color:#d4bfff;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;resize:none;min-height:40px;max-height:80px}
+.chat-input::placeholder{color:#5a4d7a}
+.chat-input:focus{border-color:rgba(124,58,237,.4)}
+.chat-send{padding:8px 16px;border:none;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:.2s;white-space:nowrap}
+.chat-send:hover{filter:brightness(1.15)}.chat-send:active{transform:scale(.95)}
+.chat-send:disabled{opacity:.5;pointer-events:none}
+.btn-complete{flex:0 0 auto;padding:14px 18px;border:none;border-radius:12px;background:linear-gradient(135deg,#3776AB,#2a5f8f);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .2s ease}
+.btn-complete.done{background:linear-gradient(135deg,#28a745,#20863a)}
+
 .celebration{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);animation:fadeInOut 1.8s ease-in-out forwards}
 .celebration span{font-size:80px;animation:popIn .5s cubic-bezier(.68,-.55,.27,1.55)}
 @keyframes fadeInOut{0%{opacity:0}20%{opacity:1}80%{opacity:1}100%{opacity:0}}
@@ -146,6 +169,7 @@ body{min-height:100vh;min-height:100dvh;background:linear-gradient(160deg,#0a0e1
 .btn-run{padding:12px;font-size:14px;margin-top:10px}.output-body{font-size:12px;padding:12px 14px}
 .actions{gap:8px;margin-top:10px}.btn-view-answer,.btn-complete{padding:12px;font-size:13px}.nav-btns{gap:8px;margin-top:12px}.nav-btn{padding:10px;font-size:12px}
 .answer-code{padding:12px 16px;font-size:11px}.celebration span{font-size:60px}
+.chat-panel{border-radius:12px}.chat-messages{max-height:220px;padding:10px 12px}.chat-msg{font-size:12px;padding:8px 12px}.chat-input{font-size:12px;padding:8px 12px}.chat-send{font-size:12px;padding:6px 12px}
 }
 @media(max-width:380px){.container{padding:12px 10px 32px}.header h1{font-size:17px}.stage-tab{padding:7px 10px;font-size:11px}.card{padding:14px}.stage-title{font-size:16px}.code-textarea{min-height:160px;font-size:11px}}
 </style>
@@ -422,12 +446,14 @@ function renderPractice(){
       <div class="editor-wrap"><div class="editor-header"><div class="traffic-lights"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="filename">stage${s.id}.py</span></div><button class="reset-btn" onclick="rstCode()">↺ 초기화</button></div><div class="editor-body"><div class="line-numbers" id="lineNumbers">${lines.map((_,i)=>`<div>${i+1}</div>`).join('')}</div><textarea class="code-textarea" id="codeArea" spellcheck="false" oninput="onIn(this)" onkeydown="onK(event)">${escH(code)}</textarea></div><div class="editor-footer"><span>${lines.length} lines</span><span>Python 3</span></div></div>
       <button class="btn-run" onclick="executeCode()">▶ 실행하기</button>
       <div id="outputArea"></div>
-      <div class="actions"><button class="btn-view-answer" onclick="togA()">${showAnswer?'정답 숨기기':'👀 정답 확인'}</button><button class="btn-complete ${isDone?'done':''}" onclick="markDone()">${isDone?'✓ 완료됨':'✓ 완료 표시'}</button></div>
+      <div class="actions"><button class="btn-view-answer" onclick="togA()">${showAnswer?'정답 숨기기':'👀 정답 확인'}</button><button class="btn-ask" onclick="togChat()">💬 질문하기</button><button class="btn-complete ${isDone?'done':''}" onclick="markDone()" title="완료 표시">${isDone?'✓':'☐'}</button></div>
       ${ansH}
+      <div id="chatPanel"></div>
       <div class="nav-btns"><button class="nav-btn" ${currentStage===0?'disabled':''} onclick="goTo(${currentStage-1})">← 이전</button><button class="nav-btn" ${currentStage===stages.length-1?'disabled':''} onclick="goTo(${currentStage+1})">다음 →</button></div>
     </div>
   </div>`;
   if(lastRunResult)renderOutput();
+  if(showChat)renderChatPanel();
 }
 
 function render(){if(!currentCourse)renderCourseSelect();else renderPractice()}
@@ -439,7 +465,7 @@ function selectCourse(key){currentCourse=key;currentStage=0;code=COURSES[key].st
 try{const r=localStorage.getItem('pyD5_'+key);if(r){const d=JSON.parse(r);if(d.s!==undefined)currentStage=d.s;if(d.c)d.c.forEach(i=>completedStages.add(i));if(d.codes)savedCodes=d.codes;code=savedCodes[getCourseKey()]||COURSES[key].stages[currentStage].starterCode;}}catch(e){}
 render();saveP()}
 function backToCourse(){currentCourse=null;render()}
-function goTo(i){if(i<0||i>=getStages().length)return;savedCodes[getCourseKey()]=code;currentStage=i;code=savedCodes[getCK(i)]||getStages()[i].starterCode;openHints={};showConcepts=false;showAnswer=false;lastRunResult=null;render();saveCourse();window.scrollTo({top:0,behavior:'smooth'})}
+function goTo(i){if(i<0||i>=getStages().length)return;savedCodes[getCourseKey()]=code;currentStage=i;code=savedCodes[getCK(i)]||getStages()[i].starterCode;openHints={};showConcepts=false;showAnswer=false;showChat=false;lastRunResult=null;render();saveCourse();window.scrollTo({top:0,behavior:'smooth'})}
 function togH(i){openHints[i]=!openHints[i];render()}
 function togC(){showConcepts=!showConcepts;render()}
 function togA(){showAnswer=!showAnswer;render()}
@@ -449,6 +475,189 @@ function markDone(){completedStages.add(getCourseKey());savedCodes[getCourseKey(
 function onIn(el){code=el.value;savedCodes[getCourseKey()]=code;document.getElementById('lineNumbers').innerHTML=code.split('\n').map((_,i)=>`<div>${i+1}</div>`).join('');saveCourse()}
 function onK(e){if(e.key==='Tab'){e.preventDefault();const t=e.target,s=t.selectionStart,end=t.selectionEnd;code=t.value.substring(0,s)+'    '+t.value.substring(end);t.value=code;t.selectionStart=t.selectionEnd=s+4;savedCodes[getCourseKey()]=code;document.getElementById('lineNumbers').innerHTML=code.split('\n').map((_,i)=>`<div>${i+1}</div>`).join('');saveCourse()}}
 function saveCourse(){if(!currentCourse)return;try{localStorage.setItem('pyD5_'+currentCourse,JSON.stringify({s:currentStage,c:[...completedStages],codes:savedCodes}))}catch(e){}}
+
+// ==================== AI CHAT TUTOR ====================
+let showChat = false;
+let chatMessages = {}; // per stage
+
+function getChatKey() { return currentCourse + '-' + currentStage + '-chat'; }
+
+function togChat() {
+  showChat = !showChat;
+  renderChatPanel();
+}
+
+function renderChatPanel() {
+  const el = document.getElementById('chatPanel');
+  if (!el) return;
+  if (!showChat) { el.innerHTML = ''; return; }
+
+  const key = getChatKey();
+  const msgs = chatMessages[key] || [];
+  const msgsHtml = msgs.map(m =>
+    `<div class="chat-msg ${m.role}">${m.role === 'ai' ? formatAiMsg(m.text) : escH(m.text)}</div>`
+  ).join('');
+
+  el.innerHTML = `
+    <div class="chat-panel">
+      <div class="chat-header">
+        <span>🤖 AI 튜터에게 질문하기</span>
+        <button class="chat-close" onclick="togChat()">✕</button>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        ${msgs.length === 0 ? '<div class="chat-msg ai">안녕하세요! 이 문제에 대해 궁금한 점이 있으면 편하게 질문하세요. 😊\n\n예시:\n• "f-string이 뭐예요?"\n• "왜 오류가 나요?"\n• "for 문을 어떻게 써요?"</div>' : msgsHtml}
+      </div>
+      <div class="chat-input-wrap">
+        <textarea class="chat-input" id="chatInput" placeholder="질문을 입력하세요..." rows="1" onkeydown="chatKeyDown(event)"></textarea>
+        <button class="chat-send" id="chatSendBtn" onclick="sendChat()">전송</button>
+      </div>
+    </div>`;
+
+  // Scroll to bottom
+  const msgBox = document.getElementById('chatMessages');
+  if (msgBox) msgBox.scrollTop = msgBox.scrollHeight;
+}
+
+function formatAiMsg(text) {
+  // Simple formatting: wrap `code` in <code> tags
+  return escH(text).replace(/`([^`]+)`/g, '<code>$1</code>');
+}
+
+function chatKeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+}
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  if (!input) return;
+  const question = input.value.trim();
+  if (!question) return;
+
+  const key = getChatKey();
+  if (!chatMessages[key]) chatMessages[key] = [];
+
+  // Add user message
+  chatMessages[key].push({ role: 'user', text: question });
+  
+  // Show thinking indicator
+  chatMessages[key].push({ role: 'ai', text: '생각하는 중...' });
+  renderChatPanel();
+
+  // Disable send
+  const btn = document.getElementById('chatSendBtn');
+  if (btn) btn.disabled = true;
+
+  try {
+    const s = getS();
+    const c = COURSES[currentCourse];
+    
+    // Build context about current problem
+    const systemPrompt = `당신은 친절한 파이썬 프로그래밍 튜터입니다. 초보자가 이해하기 쉽게 한국어로 답변하세요.
+
+현재 학생이 풀고 있는 문제:
+- 코스: ${c.name}
+- 단계: ${s.id}단계 - ${s.title}
+- 문제: ${s.task}
+- 핵심 개념: ${s.concepts.join(', ')}
+
+학생이 현재 작성한 코드:
+\`\`\`python
+${code}
+\`\`\`
+
+${lastRunResult ? (lastRunResult.success ? '실행 결과: 성공\n출력: ' + lastRunResult.output : '실행 결과: 오류\n에러: ' + lastRunResult.error) : '아직 실행하지 않았습니다.'}
+
+규칙:
+1. 정답을 바로 알려주지 말고, 힌트와 설명으로 스스로 풀 수 있게 도와주세요.
+2. 학생이 정답을 직접 요구하면 단계적으로 안내하세요.
+3. 코드 예시를 줄 때는 현재 문제와 다른 간단한 예시를 사용하세요.
+4. 짧고 명확하게 답변하세요 (3~5문장).
+5. 격려와 응원을 포함하세요.`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: buildChatHistory(key, question)
+      })
+    });
+
+    const data = await response.json();
+    const aiText = data.content && data.content[0] ? data.content[0].text : '죄송합니다, 응답을 받지 못했습니다. 다시 시도해주세요.';
+
+    // Replace thinking indicator with actual response
+    chatMessages[key][chatMessages[key].length - 1] = { role: 'ai', text: aiText };
+  } catch (e) {
+    // If API fails, provide offline help based on hints
+    const s = getS();
+    let offlineAnswer = getOfflineHelp(question, s);
+    chatMessages[key][chatMessages[key].length - 1] = { role: 'ai', text: offlineAnswer };
+  }
+
+  renderChatPanel();
+  if (btn) btn.disabled = false;
+}
+
+function buildChatHistory(key, currentQuestion) {
+  const msgs = chatMessages[key] || [];
+  const history = [];
+  // Include last few exchanges for context (skip the thinking indicator)
+  const relevant = msgs.filter(m => m.text !== '생각하는 중...').slice(-8);
+  for (const m of relevant) {
+    if (m.role === 'user') history.push({ role: 'user', content: m.text });
+    else if (m.role === 'ai') history.push({ role: 'assistant', content: m.text });
+  }
+  // Make sure last message is user
+  if (history.length === 0 || history[history.length - 1].role !== 'user') {
+    history.push({ role: 'user', content: currentQuestion });
+  }
+  return history;
+}
+
+function getOfflineHelp(question, stage) {
+  const q = question.toLowerCase();
+  
+  // Check for common questions and provide relevant hints
+  if (q.includes('오류') || q.includes('에러') || q.includes('안돼') || q.includes('안 돼')) {
+    if (lastRunResult && !lastRunResult.success) {
+      return `오류 메시지를 살펴볼게요:\n\n\`${lastRunResult.error}\`\n\n이 오류는 코드에 문법적인 문제가 있다는 뜻이에요. 들여쓰기(스페이스 4칸)와 콜론(:)을 확인해보세요!\n\n힌트 버튼을 하나씩 열어보면 도움이 될 거예요. 💪`;
+    }
+    return '먼저 ▶ 실행하기 버튼을 눌러서 어떤 오류가 나는지 확인해보세요. 오류 메시지가 문제 해결의 단서가 됩니다!';
+  }
+
+  if (q.includes('모르') || q.includes('어려') || q.includes('이해') || q.includes('설명')) {
+    return `이 문제의 핵심 개념은 ${stage.concepts.join(', ')} 이에요.\n\n왼쪽의 📚 핵심 개념 버튼과 힌트 버튼을 순서대로 열어보세요. 단계별로 풀어나갈 수 있어요!\n\n처음이라 어려운 게 당연해요. 천천히 해봐요! 😊`;
+  }
+
+  if (q.includes('print') || q.includes('출력')) {
+    return '`print()` 함수는 괄호 안의 값을 화면에 출력해요.\n\n예시:\n`print("안녕")` → 안녕\n`print(1 + 2)` → 3\n`print(f"값: {변수}")` → 값: (변수내용)\n\nf-string을 쓰면 변수를 {} 안에 넣을 수 있어요!';
+  }
+
+  if (q.includes('for') || q.includes('반복')) {
+    return '`for` 반복문은 리스트나 범위의 값을 하나씩 꺼내요.\n\n예시:\n`for i in range(5):` → 0,1,2,3,4 반복\n`for i in range(1, 6):` → 1,2,3,4,5 반복\n\n꼭 콜론(:)과 들여쓰기를 잊지 마세요!';
+  }
+
+  if (q.includes('if') || q.includes('조건')) {
+    return '`if` 조건문은 조건이 참일 때만 실행돼요.\n\n예시:\n`if x > 10:`\n`    print("크다")`\n`elif x > 5:`\n`    print("중간")`\n`else:`\n`    print("작다")`\n\n조건 뒤에 콜론(:)을 붙이고, 실행문은 들여쓰기 하세요!';
+  }
+
+  if (q.includes('함수') || q.includes('def') || q.includes('return')) {
+    return '함수는 `def`로 만들고 `return`으로 값을 돌려줘요.\n\n예시:\n`def add(a, b):`\n`    return a + b`\n\n`result = add(3, 5)`  → result는 8\n\n함수를 만든 후 호출해야 실행돼요!';
+  }
+
+  if (q.includes('딕셔너리') || q.includes('dict') || q.includes('items')) {
+    return '딕셔너리는 {키: 값} 쌍으로 데이터를 저장해요.\n\n예시:\n`d = {"이름": "철수", "나이": 20}`\n`d["이름"]` → "철수"\n\n`.items()`로 키와 값을 동시에 순회할 수 있어요:\n`for key, val in d.items():`';
+  }
+
+  // Default helpful response
+  return `좋은 질문이에요! 👍\n\n이 문제에서는 ${stage.concepts.join(', ')}을(를) 활용해야 해요.\n\n왼쪽의 힌트를 순서대로 확인해보시고, 코드를 조금씩 수정하면서 ▶ 실행하기로 테스트해보세요.\n\n구체적으로 어떤 부분이 헷갈리는지 알려주시면 더 자세히 도와드릴게요!`;
+}
 
 render();
 </script>
