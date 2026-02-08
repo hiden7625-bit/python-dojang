@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Python 코딩 도장</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Python 도장">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0e1a">
+<link rel="icon" id="favicon" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;min-height:100dvh;background:linear-gradient(160deg,#0a0e1a 0%,#101829 40%,#0d1520 100%);font-family:'Noto Sans KR','Apple SD Gothic Neo',-apple-system,sans-serif;color:#c8d6e5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+@supports(padding-top:env(safe-area-inset-top)){body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}}
+.container{max-width:1160px;margin:0 auto;padding:28px 24px 60px}
+.header{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.header h1{font-size:26px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(135deg,#FFD43B 0%,#3776AB 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.subtitle{font-size:13px;color:#5a6a80;margin:0 0 24px 42px}
+.progress-bar{height:4px;border-radius:2px;background:#1a2236;margin-bottom:28px;overflow:hidden}
+.progress-fill{height:100%;border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+
+/* === COURSE SELECT SCREEN === */
+.course-select{display:flex;flex-direction:column;align-items:center;padding:40px 0}
+.course-select h2{font-size:28px;font-weight:800;color:#e8eef5;margin-bottom:8px;text-align:center}
+.course-select p{font-size:14px;color:#6a7d94;margin-bottom:40px;text-align:center}
+.course-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;width:100%;max-width:900px}
+.course-card{border-radius:20px;padding:32px 24px;cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden;text-align:center}
+.course-card:hover{transform:translateY(-4px)}
+.course-card:active{transform:scale(.97)}
+.course-card .emoji{font-size:48px;margin-bottom:16px;display:block}
+.course-card h3{font-size:20px;font-weight:700;margin-bottom:6px}
+.course-card .level-desc{font-size:12px;line-height:1.6;margin-bottom:16px;min-height:60px}
+.course-card .topics{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.course-card .topic-tag{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:500}
+.course-card .start-label{margin-top:20px;padding:10px 24px;border-radius:10px;font-size:13px;font-weight:700;display:inline-block}
+
+.card-beginner{background:linear-gradient(145deg,rgba(46,160,67,.12),rgba(46,160,67,.04));border:1px solid rgba(46,160,67,.2)}
+.card-beginner:hover{box-shadow:0 8px 32px rgba(46,160,67,.2)}
+.card-beginner h3{color:#2ea043}.card-beginner .level-desc{color:#6abf7b}
+.card-beginner .topic-tag{background:rgba(46,160,67,.12);color:#4ecc6a}
+.card-beginner .start-label{background:rgba(46,160,67,.15);color:#2ea043}
+
+.card-intermediate{background:linear-gradient(145deg,rgba(232,163,23,.12),rgba(232,163,23,.04));border:1px solid rgba(232,163,23,.2)}
+.card-intermediate:hover{box-shadow:0 8px 32px rgba(232,163,23,.2)}
+.card-intermediate h3{color:#e8a317}.card-intermediate .level-desc{color:#d4b96a}
+.card-intermediate .topic-tag{background:rgba(232,163,23,.12);color:#f0bc42}
+.card-intermediate .start-label{background:rgba(232,163,23,.15);color:#e8a317}
+
+.card-advanced{background:linear-gradient(145deg,rgba(200,60,60,.12),rgba(200,60,60,.04));border:1px solid rgba(200,60,60,.2)}
+.card-advanced:hover{box-shadow:0 8px 32px rgba(200,60,60,.2)}
+.card-advanced h3{color:#e05555}.card-advanced .level-desc{color:#d48a8a}
+.card-advanced .topic-tag{background:rgba(200,60,60,.12);color:#f07070}
+.card-advanced .start-label{background:rgba(200,60,60,.15);color:#e05555}
+
+/* Course badge in practice view */
+.course-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:16px;cursor:pointer;transition:.2s}
+.course-badge:hover{filter:brightness(1.2)}
+.badge-beginner{background:rgba(46,160,67,.12);color:#4ecc6a;border:1px solid rgba(46,160,67,.2)}
+.badge-intermediate{background:rgba(232,163,23,.12);color:#f0bc42;border:1px solid rgba(232,163,23,.2)}
+.badge-advanced{background:rgba(200,60,60,.12);color:#f07070;border:1px solid rgba(200,60,60,.2)}
+
+.stage-tabs{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap}
+.stage-tab{padding:10px 18px;border:none;border-radius:10px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;transition:all .25s ease;background:rgba(255,255,255,.04);color:#5a6a80}
+.stage-tab.active{color:#fff;box-shadow:0 4px 20px rgba(55,118,171,.3);transform:translateY(-1px)}
+.stage-tab.done{background:rgba(55,118,171,.15);color:#5ba3d9}
+.tab-beginner.active{background:linear-gradient(135deg,#2ea043,#238636)}
+.tab-intermediate.active{background:linear-gradient(135deg,#e8a317,#d4940f)}
+.tab-advanced.active{background:linear-gradient(135deg,#e05555,#c04040)}
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.card{background:rgba(255,255,255,.03);border-radius:16px;border:1px solid rgba(255,255,255,.06);padding:28px;margin-bottom:20px}
+.stage-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-family:'Fira Code',monospace}
+.label-beginner{color:#2ea043}.label-intermediate{color:#e8a317}.label-advanced{color:#e05555}
+.stage-difficulty{font-size:14px;letter-spacing:2px}
+.stage-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.stage-title{font-size:22px;font-weight:700;margin-bottom:10px;color:#e8eef5}
+.stage-desc{font-size:14px;color:#7a8da3;line-height:1.6;margin-bottom:20px}
+.task-box{background:rgba(55,118,171,.08);border-radius:12px;border:1px solid rgba(55,118,171,.15);padding:20px}
+.task-label{font-size:11px;font-weight:700;color:#FFD43B;letter-spacing:1px;margin-bottom:10px}
+.task-text{font-size:13px;color:#b0c4de;line-height:1.8;white-space:pre-wrap;font-family:'Noto Sans KR',sans-serif}
+.accordion-btn{width:100%;padding:14px 20px;border-radius:12px;cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;transition:all .2s ease;border:none;outline:none}
+.accordion-btn:hover{filter:brightness(1.15)}.accordion-btn:active{transform:scale(.98)}
+.concept-btn{background:rgba(255,212,59,.06);border:1px solid rgba(255,212,59,.12)!important;color:#FFD43B;margin-bottom:12px}
+.hint-btn{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)!important;color:#8a9ab5;margin-bottom:8px}
+.hint-btn.answer-btn{background:rgba(120,200,120,.06);border:1px solid rgba(120,200,120,.15)!important;color:#78c878}
+.arrow{transition:transform .3s;font-size:12px}.arrow.open{transform:rotate(180deg)}
+.accordion-content{overflow:hidden;max-height:0;opacity:0;transition:max-height .35s ease,opacity .25s ease}
+.accordion-content.open{max-height:600px;opacity:1}
+.concept-content{background:rgba(255,212,59,.04);border-radius:12px;border:1px solid rgba(255,212,59,.08);padding:16px 20px;margin-bottom:12px}
+.concept-tags{display:flex;flex-wrap:wrap;gap:8px}
+.concept-tag{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;background:rgba(255,212,59,.1);color:#FFD43B;font-family:'Fira Code',monospace}
+.hint-content{margin-top:4px;margin-bottom:8px;padding:16px 20px;background:rgba(0,0,0,.25);border-radius:10px;border:1px solid rgba(255,255,255,.04)}
+.hint-content pre{font-size:13px;color:#a8c4e0;line-height:1.8;margin:0;font-family:'Fira Code',monospace;white-space:pre-wrap;word-break:break-all}
+.editor-wrap{background:#0d1117;border-radius:16px;border:1px solid rgba(255,255,255,.06);overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.3)}
+.editor-header{padding:14px 20px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center}
+.traffic-lights{display:flex;gap:8px;align-items:center}
+.dot{width:12px;height:12px;border-radius:50%}.dot-red{background:#ff5f57}.dot-yellow{background:#febc2e}.dot-green{background:#28c840}
+.filename{margin-left:12px;font-size:12px;color:#4a5568;font-family:'Fira Code',monospace}
+.reset-btn{padding:5px 12px;background:rgba(255,255,255,.06);border:none;border-radius:6px;color:#7a8da3;font-size:11px;cursor:pointer;font-family:'Fira Code',monospace;transition:.2s}
+.reset-btn:hover{background:rgba(255,255,255,.1)}
+.editor-body{position:relative}
+.line-numbers{position:absolute;top:0;left:0;width:44px;padding:20px 0;text-align:right;font-family:'Fira Code',monospace;font-size:13px;color:#2d3748;line-height:22px;user-select:none;border-right:1px solid rgba(255,255,255,.04);pointer-events:none;z-index:1}
+.line-numbers div{padding-right:12px}
+.code-textarea{width:100%;min-height:240px;padding:20px 20px 20px 56px;background:transparent;border:none;outline:none;resize:vertical;font-family:'Fira Code',monospace;font-size:13px;line-height:22px;color:#e2e8f0;caret-color:#FFD43B}
+.code-textarea::selection{background:rgba(55,118,171,.4)}
+.editor-footer{padding:14px 20px;border-top:1px solid rgba(255,255,255,.04);display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#3d4f65;font-family:'Fira Code',monospace}
+.btn-run{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#e8a317,#d4940f);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;box-shadow:0 4px 16px rgba(232,163,23,.3);transition:all .2s ease;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-run:hover{filter:brightness(1.1)}.btn-run:active{transform:scale(.97)}
+.output-wrap{margin-top:12px;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.06);animation:slideDown .3s ease}
+.output-header{padding:10px 16px;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;font-family:'Fira Code',monospace}
+.output-header.success{background:rgba(40,200,64,.1);color:#28c840;border-bottom:1px solid rgba(40,200,64,.15)}
+.output-header.error{background:rgba(255,95,87,.1);color:#ff5f57;border-bottom:1px solid rgba(255,95,87,.15)}
+.output-header .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px}
+.output-header.success .status-dot{background:#28c840;box-shadow:0 0 8px rgba(40,200,64,.5)}
+.output-header.error .status-dot{background:#ff5f57;box-shadow:0 0 8px rgba(255,95,87,.5)}
+.output-body{padding:14px 16px;background:rgba(0,0,0,.35);font-family:'Fira Code',monospace;font-size:13px;line-height:1.7;white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto}
+.output-body.success-text{color:#a8e6a8}.output-body.error-text{color:#ffb0ab}
+.output-time{font-size:10px;opacity:.6}
+.actions{display:flex;gap:10px;margin-top:10px}
+.btn-view-answer{flex:1;padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.03);color:#8a9ab5;font-size:14px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .2s ease}
+.btn-complete{flex:1;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#3776AB,#2a5f8f);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;box-shadow:0 4px 16px rgba(55,118,171,.25);transition:all .2s ease}
+.btn-complete.done{background:linear-gradient(135deg,#28a745,#20863a)}
+.btn-complete:hover,.btn-view-answer:hover{filter:brightness(1.1)}
+.answer-panel{margin-top:12px;border-radius:12px;overflow:hidden;border:1px solid rgba(120,200,120,.15);animation:slideDown .3s ease}
+.answer-header{padding:12px 20px;background:rgba(120,200,120,.08);font-size:12px;font-weight:700;color:#78c878}
+.answer-code{margin:0;padding:16px 20px;background:rgba(0,0,0,.3);font-family:'Fira Code',monospace;font-size:13px;color:#a8c4e0;line-height:1.8;white-space:pre-wrap;word-break:break-all}
+.copy-to-editor{width:100%;padding:12px;background:rgba(120,200,120,.06);border:none;border-top:1px solid rgba(120,200,120,.1);color:#78c878;font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR',sans-serif}
+.nav-btns{display:flex;gap:10px;margin-top:16px}
+.nav-btn{flex:1;padding:12px;border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(255,255,255,.02);color:#7a8da3;font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:.2s}
+.nav-btn:disabled{color:#2d3748;cursor:default}
+.celebration{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);animation:fadeInOut 1.8s ease-in-out forwards}
+.celebration span{font-size:80px;animation:popIn .5s cubic-bezier(.68,-.55,.27,1.55)}
+@keyframes fadeInOut{0%{opacity:0}20%{opacity:1}80%{opacity:1}100%{opacity:0}}
+@keyframes popIn{0%{transform:scale(0)}100%{transform:scale(1)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:768px){
+.container{padding:16px 14px 40px}.header h1{font-size:20px}.header svg{width:24px;height:24px}.subtitle{font-size:11px;margin:0 0 16px 38px}
+.course-cards{grid-template-columns:1fr;max-width:400px}.course-card{padding:24px 20px}.course-select h2{font-size:22px}.course-select p{font-size:12px;margin-bottom:24px}
+.stage-tabs{gap:6px;margin-bottom:16px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}.stage-tabs::-webkit-scrollbar{display:none}.stage-tab{padding:8px 14px;font-size:12px;border-radius:8px;flex-shrink:0}
+.main-grid{grid-template-columns:1fr;gap:16px}.card{padding:20px;margin-bottom:14px}.stage-title{font-size:18px}.task-box{padding:16px}.task-text{font-size:12px;line-height:1.7}
+.accordion-btn{padding:12px 16px;font-size:12px}.hint-content pre{font-size:11px}
+.editor-wrap{border-radius:14px}.code-textarea{min-height:180px;padding:16px 14px 16px 46px;font-size:12px;line-height:20px}.line-numbers{width:36px;font-size:11px;line-height:20px;padding:16px 0}.line-numbers div{padding-right:8px}.editor-footer{padding:10px 14px;font-size:10px}
+.btn-run{padding:12px;font-size:14px;margin-top:10px}.output-body{font-size:12px;padding:12px 14px}
+.actions{gap:8px;margin-top:10px}.btn-view-answer,.btn-complete{padding:12px;font-size:13px}.nav-btns{gap:8px;margin-top:12px}.nav-btn{padding:10px;font-size:12px}
+.answer-code{padding:12px 16px;font-size:11px}.celebration span{font-size:60px}
+}
+@media(max-width:380px){.container{padding:12px 10px 32px}.header h1{font-size:17px}.stage-tab{padding:7px 10px;font-size:11px}.card{padding:14px}.stage-title{font-size:16px}.code-textarea{min-height:160px;font-size:11px}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="celebration" id="celebration" style="display:none"><span>🎉</span></div>
+<div class="header">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M13.9 2C8.3 2 8.8 4.5 8.8 4.5V7.2h5.3v.8H6.4S2 7.4 2 13.1s3.8 5.5 3.8 5.5h2.3v-2.7s-.1-3.8 3.7-3.8h5.2s3.6.1 3.6-3.5V4.8S21.2 2 13.9 2zm-2.9 1.6c.5 0 1 .4 1 1s-.4 1-1 1c-.5 0-1-.4-1-1s.5-1 1-1z" fill="#3776AB"/><path d="M14.1 26c5.6 0 5.1-2.5 5.1-2.5v-2.7h-5.3v-.8h7.7S26 20.6 26 14.9s-3.8-5.5-3.8-5.5h-2.3v2.7s.1 3.8-3.7 3.8H11s-3.6-.1-3.6 3.5v3.8S6.8 26 14.1 26zm2.9-1.6c-.5 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.5 1-1 1z" fill="#FFD43B"/></svg>
+<h1>Python 코딩 도장</h1>
+</div>
+<p class="subtitle">단계별로 파이썬을 마스터하세요</p>
+<div id="mainContent"></div>
+</div>
+
+<script>
+// ==================== ICON ====================
+(function(){const c=document.createElement('canvas');c.width=180;c.height=180;const x=c.getContext('2d');const g=x.createLinearGradient(0,0,180,180);g.addColorStop(0,'#0f1729');g.addColorStop(1,'#162035');x.fillStyle=g;x.beginPath();x.roundRect(0,0,180,180,36);x.fill();x.fillStyle='#3776AB';x.beginPath();x.arc(72,68,32,0,Math.PI*2);x.fill();x.fillStyle='#FFD43B';x.beginPath();x.arc(108,112,32,0,Math.PI*2);x.fill();x.fillStyle='#fff';x.font='bold 48px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('Py',90,90);const d=c.toDataURL('image/png');document.getElementById('favicon').href=d;const a=document.createElement('link');a.rel='apple-touch-icon';a.href=d;document.head.appendChild(a)})();
+
+// ==================== ALL COURSE DATA ====================
+const COURSES = {
+beginner: {
+  name: '초급', emoji: '🌱', color: 'beginner',
+  desc: '프로그래밍이 처음이신 분',
+  topics: ['변수','출력','조건문','반복문','함수'],
+  stages: [
+    {id:1,title:"변수와 출력",difficulty:"⭐",description:"이름과 나이를 변수에 저장하고 출력해보세요.",
+    task:'변수 name에 자신의 이름(문자열), age에 나이(숫자)를 저장하고,\n"안녕하세요, 저는 {이름}이고 {나이}살입니다." 형태로 출력하세요.',
+    hints:[{label:"힌트 1: 변수 선언",detail:'문자열은 따옴표로 감싸요.\nname = "홍길동"\nage = 25'},{label:"힌트 2: f-string",detail:'f-string을 사용하면 변수를 쉽게 넣을 수 있어요.\nprint(f"텍스트 {변수}")'},{label:"💡 정답 보기",detail:'name = "홍길동"\nage = 25\nprint(f"안녕하세요, 저는 {name}이고 {age}살입니다.")'}],
+    starterCode:'# 변수를 선언하고 출력해보세요\nname = \nage = \nprint()',
+    sampleAnswer:'name = "홍길동"\nage = 25\nprint(f"안녕하세요, 저는 {name}이고 {age}살입니다.")',
+    concepts:["변수 선언","자료형 (str, int)","f-string","print()"]},
+
+    {id:2,title:"조건문 (if/else)",difficulty:"⭐⭐",description:"점수에 따라 등급을 출력하는 프로그램을 만드세요.",
+    task:"변수 score에 점수(0~100)를 저장하고,\n90 이상이면 'A', 80 이상이면 'B', 70 이상이면 'C', 그 외는 'F'를 출력하세요.",
+    hints:[{label:"힌트 1: if 구조",detail:"if 조건:\n    실행문\nelif 다른조건:\n    실행문\nelse:\n    실행문"},{label:"힌트 2: 비교 연산자",detail:">= 는 '이상'을 의미해요.\n큰 숫자부터 비교하면 편해요!"},{label:"💡 정답 보기",detail:'score = 85\nif score >= 90:\n    print("A")\nelif score >= 80:\n    print("B")\nelif score >= 70:\n    print("C")\nelse:\n    print("F")'}],
+    starterCode:"score = 85\n# 조건문을 작성해보세요\n",
+    sampleAnswer:'score = 85\nif score >= 90:\n    print("A")\nelif score >= 80:\n    print("B")\nelif score >= 70:\n    print("C")\nelse:\n    print("F")',
+    concepts:["if / elif / else","비교 연산자 (>=)","들여쓰기","조건 순서"]},
+
+    {id:3,title:"반복문 (for)",difficulty:"⭐⭐⭐",description:"1부터 10까지의 숫자 중 짝수만 출력하세요.",
+    task:"for 반복문과 range()를 사용해서\n1부터 10까지 숫자 중 짝수만 출력하세요.\n출력 예: 2 4 6 8 10",
+    hints:[{label:"힌트 1: range()",detail:"range(1, 11)은 1부터 10까지\n숫자를 만들어줘요."},{label:"힌트 2: 짝수 판별",detail:"숫자 % 2 == 0 이면 짝수예요."},{label:"💡 정답 보기",detail:"for i in range(1, 11):\n    if i % 2 == 0:\n        print(i)"}],
+    starterCode:"# for 반복문으로 짝수를 출력하세요\n",
+    sampleAnswer:"for i in range(1, 11):\n    if i % 2 == 0:\n        print(i)",
+    concepts:["for 반복문","range()","나머지 연산자 (%)","조건 필터링"]},
+
+    {id:4,title:"리스트와 함수",difficulty:"⭐⭐⭐⭐",description:"리스트에서 최대값을 찾는 함수를 만드세요.",
+    task:'함수 find_max(numbers)를 만들어서\n리스트에서 가장 큰 수를 반환하세요.\n(내장함수 max() 사용 금지!)\n\n테스트: find_max([3, 7, 2, 9, 5]) → 9',
+    hints:[{label:"힌트 1: 함수 선언",detail:"def find_max(numbers):\n    # 코드 작성\n    return 결과"},{label:"힌트 2: 알고리즘",detail:"첫 번째 값을 최대값으로 놓고,\n하나씩 비교하며 더 큰 값이면 교체"},{label:"💡 정답 보기",detail:"def find_max(numbers):\n    max_val = numbers[0]\n    for num in numbers:\n        if num > max_val:\n            max_val = num\n    return max_val\n\nprint(find_max([3, 7, 2, 9, 5]))"}],
+    starterCode:"def find_max(numbers):\n    # 최대값을 찾아 반환하세요\n    \n    return\n\nprint(find_max([3, 7, 2, 9, 5]))",
+    sampleAnswer:"def find_max(numbers):\n    max_val = numbers[0]\n    for num in numbers:\n        if num > max_val:\n            max_val = num\n    return max_val\n\nprint(find_max([3, 7, 2, 9, 5]))",
+    concepts:["def 함수 정의","return","리스트 인덱싱","반복 비교"]},
+
+    {id:5,title:"딕셔너리 활용",difficulty:"⭐⭐⭐⭐⭐",description:"학생들의 평균 점수를 계산하세요.",
+    task:'딕셔너리에 학생 이름과 점수 리스트를 저장하고,\n각 학생의 평균 점수를 출력하세요.\n\n예: {"철수": [80, 90, 70], "영희": [95, 85, 100]}',
+    hints:[{label:"힌트 1: 딕셔너리 순회",detail:".items()로 key와 value를\n동시에 가져올 수 있어요."},{label:"힌트 2: 평균",detail:"평균 = sum(리스트) / len(리스트)"},{label:"💡 정답 보기",detail:'students = {\n    "철수": [80, 90, 70],\n    "영희": [95, 85, 100]\n}\nfor name, scores in students.items():\n    avg = sum(scores) / len(scores)\n    print(f"{name}: {avg:.1f}점")'}],
+    starterCode:'students = {\n    "철수": [80, 90, 70],\n    "영희": [95, 85, 100]\n}\n# 각 학생의 평균을 구해 출력하세요\n',
+    sampleAnswer:'students = {\n    "철수": [80, 90, 70],\n    "영희": [95, 85, 100]\n}\nfor name, scores in students.items():\n    avg = sum(scores) / len(scores)\n    print(f"{name}: {avg:.1f}점")',
+    concepts:["딕셔너리",".items()","sum() / len()","f-string :.1f"]}
+  ]
+},
+
+intermediate: {
+  name: '중급', emoji: '🔥', color: 'intermediate',
+  desc: '기초 문법을 알고 있는 분',
+  topics: ['리스트 컴프리헨션','문자열 처리','정렬','2차원 리스트','재귀'],
+  stages: [
+    {id:1,title:"리스트 컴프리헨션",difficulty:"⭐",description:"리스트 컴프리헨션으로 데이터를 변환하세요.",
+    task:'숫자 리스트 [1,2,3,4,5,6,7,8,9,10]에서\n홀수만 골라 제곱한 새 리스트를 만드세요.\n결과: [1, 9, 25, 49, 81]',
+    hints:[{label:"힌트 1: 기본 형태",detail:"[표현식 for 변수 in 리스트]"},{label:"힌트 2: 조건 추가",detail:"[표현식 for 변수 in 리스트 if 조건]"},{label:"💡 정답 보기",detail:"nums = [1,2,3,4,5,6,7,8,9,10]\nresult = [x**2 for x in nums if x % 2 != 0]\nprint(result)"}],
+    starterCode:"nums = [1,2,3,4,5,6,7,8,9,10]\n# 리스트 컴프리헨션을 사용하세요\nresult = \nprint(result)",
+    sampleAnswer:"nums = [1,2,3,4,5,6,7,8,9,10]\nresult = [x**2 for x in nums if x % 2 != 0]\nprint(result)",
+    concepts:["리스트 컴프리헨션","조건 필터링","거듭제곱 (**)","홀수 판별"]},
+
+    {id:2,title:"문자열 처리",difficulty:"⭐⭐",description:"문장에서 단어 빈도를 세는 프로그램을 만드세요.",
+    task:'문장에서 각 단어가 몇 번 나왔는지 세세요.\n\ntext = "apple banana apple cherry banana apple"\n결과: apple:3, banana:2, cherry:1',
+    hints:[{label:"힌트 1: 분리",detail:'.split()으로 단어를 나눌 수 있어요.\nwords = text.split()'},{label:"힌트 2: 딕셔너리로 세기",detail:"빈 딕셔너리를 만들고\n단어가 있으면 +1, 없으면 1로 설정"},{label:"💡 정답 보기",detail:'text = "apple banana apple cherry banana apple"\nwords = text.split()\ncount = {}\nfor w in words:\n    if w in count:\n        count[w] = count[w] + 1\n    else:\n        count[w] = 1\nfor word, cnt in count.items():\n    print(f"{word}: {cnt}")'}],
+    starterCode:'text = "apple banana apple cherry banana apple"\n# 단어 빈도를 세세요\n',
+    sampleAnswer:'text = "apple banana apple cherry banana apple"\nwords = text.split()\ncount = {}\nfor w in words:\n    if w in count:\n        count[w] = count[w] + 1\n    else:\n        count[w] = 1\nfor word, cnt in count.items():\n    print(f"{word}: {cnt}")',
+    concepts:[".split()","딕셔너리 활용","in 연산자","빈도 카운팅"]},
+
+    {id:3,title:"버블 정렬 구현",difficulty:"⭐⭐⭐",description:"버블 정렬 알고리즘을 직접 구현하세요.",
+    task:'리스트 [64, 34, 25, 12, 22, 11, 90]을\n버블 정렬로 오름차순 정렬하세요.\n(sorted() 사용 금지!)',
+    hints:[{label:"힌트 1: 원리",detail:"인접한 두 수를 비교하여\n큰 수를 뒤로 보내는 것을 반복"},{label:"힌트 2: 이중 반복문",detail:"바깥 for: 전체 반복 횟수\n안쪽 for: 인접 비교"},{label:"💡 정답 보기",detail:'nums = [64, 34, 25, 12, 22, 11, 90]\nn = len(nums)\nfor i in range(n):\n    for j in range(0, n-i-1):\n        if nums[j] > nums[j+1]:\n            nums[j], nums[j+1] = nums[j+1], nums[j]\nprint(nums)'}],
+    starterCode:'nums = [64, 34, 25, 12, 22, 11, 90]\n# 버블 정렬을 구현하세요\n\nprint(nums)',
+    sampleAnswer:'nums = [64, 34, 25, 12, 22, 11, 90]\nn = len(nums)\nfor i in range(n):\n    for j in range(0, n-i-1):\n        if nums[j] > nums[j+1]:\n            nums[j], nums[j+1] = nums[j+1], nums[j]\nprint(nums)',
+    concepts:["버블 정렬","이중 반복문","값 교환 (swap)","알고리즘 기초"]},
+
+    {id:4,title:"2차원 리스트",difficulty:"⭐⭐⭐⭐",description:"구구단 표를 2차원 리스트로 만드세요.",
+    task:'2~9단의 구구단을 2차원 리스트로 만들고\n각 단의 결과를 출력하세요.\n\n출력 예:\n2단: 2 4 6 8 10 12 14 16 18\n3단: 3 6 9 12 15 18 21 24 27\n...',
+    hints:[{label:"힌트 1: 2차원 리스트",detail:"바깥 리스트 안에 리스트들이 들어있는 구조\n[[1,2,3], [4,5,6]]"},{label:"힌트 2: 이중 반복문",detail:"for i in range(2, 10):\n    row = []\n    for j in range(1, 10):\n        row.append(i * j)"},{label:"💡 정답 보기",detail:'table = []\nfor i in range(2, 10):\n    row = []\n    for j in range(1, 10):\n        row.append(i * j)\n    table.append(row)\nfor i in range(len(table)):\n    dan = i + 2\n    nums = table[i]\n    line = " ".join([str(n) for n in nums])\n    print(f"{dan}단: {line}")'}],
+    starterCode:'# 구구단 2차원 리스트를 만드세요\ntable = []\n\n',
+    sampleAnswer:'table = []\nfor i in range(2, 10):\n    row = []\n    for j in range(1, 10):\n        row.append(i * j)\n    table.append(row)\nfor i in range(len(table)):\n    dan = i + 2\n    nums = table[i]\n    line = " ".join([str(n) for n in nums])\n    print(f"{dan}단: {line}")',
+    concepts:["2차원 리스트","이중 반복문",".append()","리스트 → 문자열"]},
+
+    {id:5,title:"재귀 함수",difficulty:"⭐⭐⭐⭐⭐",description:"재귀로 피보나치 수열을 구현하세요.",
+    task:'재귀 함수로 n번째 피보나치 수를 구하세요.\n피보나치: 0, 1, 1, 2, 3, 5, 8, 13, 21...\nfib(0)=0, fib(1)=1, fib(n)=fib(n-1)+fib(n-2)\n\n0~9번째까지 출력하세요.',
+    hints:[{label:"힌트 1: 재귀란",detail:"함수가 자기 자신을 호출하는 것\n반드시 종료 조건(base case)이 필요!"},{label:"힌트 2: 종료 조건",detail:"if n <= 0: return 0\nif n == 1: return 1"},{label:"💡 정답 보기",detail:'def fib(n):\n    if n <= 0:\n        return 0\n    if n == 1:\n        return 1\n    return fib(n-1) + fib(n-2)\n\nfor i in range(10):\n    print(f"fib({i}) = {fib(i)}")'}],
+    starterCode:'def fib(n):\n    # 재귀로 피보나치를 구현하세요\n    pass\n\nfor i in range(10):\n    print(f"fib({i}) = {fib(i)}")',
+    sampleAnswer:'def fib(n):\n    if n <= 0:\n        return 0\n    if n == 1:\n        return 1\n    return fib(n-1) + fib(n-2)\n\nfor i in range(10):\n    print(f"fib({i}) = {fib(i)}")',
+    concepts:["재귀 함수","종료 조건 (base case)","피보나치 수열","함수 호출 스택"]}
+  ]
+},
+
+advanced: {
+  name: '고급', emoji: '💎', color: 'advanced',
+  desc: '알고리즘과 심화 문법을 도전하는 분',
+  topics: ['클래스(OOP)','데코레이터','이진탐색','스택/큐','동적 프로그래밍'],
+  stages: [
+    {id:1,title:"클래스 (OOP)",difficulty:"⭐",description:"은행 계좌 클래스를 만드세요.",
+    task:'BankAccount 클래스를 만드세요.\n- __init__(self, owner, balance): 초기화\n- deposit(self, amount): 입금\n- withdraw(self, amount): 출금 (잔액 부족시 메시지)\n- info(self): 정보 출력\n\nacc = BankAccount("홍길동", 10000)\nacc.deposit(5000)\nacc.withdraw(3000)\nacc.info()  → "홍길동님의 잔액: 12000원"',
+    hints:[{label:"힌트 1: 클래스 선언",detail:"class BankAccount:\n    def __init__(self, owner, balance):\n        self.owner = owner\n        self.balance = balance"},{label:"힌트 2: 메서드",detail:"def deposit(self, amount):\n    self.balance = self.balance + amount"},{label:"💡 정답 보기",detail:'class BankAccount:\n    def __init__(self, owner, balance):\n        self.owner = owner\n        self.balance = balance\n    def deposit(self, amount):\n        self.balance = self.balance + amount\n    def withdraw(self, amount):\n        if amount > self.balance:\n            print("잔액이 부족합니다")\n        else:\n            self.balance = self.balance - amount\n    def info(self):\n        print(f"{self.owner}님의 잔액: {self.balance}원")\n\nacc = BankAccount("홍길동", 10000)\nacc.deposit(5000)\nacc.withdraw(3000)\nacc.info()'}],
+    starterCode:'class BankAccount:\n    # 클래스를 완성하세요\n    pass\n\nacc = BankAccount("홍길동", 10000)\nacc.deposit(5000)\nacc.withdraw(3000)\nacc.info()',
+    sampleAnswer:'class BankAccount:\n    def __init__(self, owner, balance):\n        self.owner = owner\n        self.balance = balance\n    def deposit(self, amount):\n        self.balance = self.balance + amount\n    def withdraw(self, amount):\n        if amount > self.balance:\n            print("잔액이 부족합니다")\n        else:\n            self.balance = self.balance - amount\n    def info(self):\n        print(f"{self.owner}님의 잔액: {self.balance}원")\n\nacc = BankAccount("홍길동", 10000)\nacc.deposit(5000)\nacc.withdraw(3000)\nacc.info()',
+    concepts:["class 선언","__init__ 생성자","self","메서드 정의"]},
+
+    {id:2,title:"클래스 상속",difficulty:"⭐⭐",description:"동물 클래스를 상속하여 확장하세요.",
+    task:'Animal 클래스와 이를 상속하는\nDog, Cat 클래스를 만드세요.\n\nAnimal: name, speak() → "..."\nDog: speak() → "{name}가 멍멍!"\nCat: speak() → "{name}가 야옹!"\n\ndog = Dog("바둑이")\ncat = Cat("나비")\n각각 speak() 호출 결과 출력',
+    hints:[{label:"힌트 1: 상속",detail:"class Dog(Animal):\n    부모 클래스 Animal을 상속받음"},{label:"힌트 2: 메서드 오버라이딩",detail:"부모의 speak()을 자식에서\n새로 정의하면 덮어씌워짐"},{label:"💡 정답 보기",detail:'class Animal:\n    def __init__(self, name):\n        self.name = name\n    def speak(self):\n        print("...")\n\nclass Dog(Animal):\n    def speak(self):\n        print(f"{self.name}가 멍멍!")\n\nclass Cat(Animal):\n    def speak(self):\n        print(f"{self.name}가 야옹!")\n\ndog = Dog("바둑이")\ncat = Cat("나비")\ndog.speak()\ncat.speak()'}],
+    starterCode:'class Animal:\n    def __init__(self, name):\n        self.name = name\n    def speak(self):\n        print("...")\n\n# Dog, Cat 클래스를 만드세요\n\ndog = Dog("바둑이")\ncat = Cat("나비")\ndog.speak()\ncat.speak()',
+    sampleAnswer:'class Animal:\n    def __init__(self, name):\n        self.name = name\n    def speak(self):\n        print("...")\n\nclass Dog(Animal):\n    def speak(self):\n        print(f"{self.name}가 멍멍!")\n\nclass Cat(Animal):\n    def speak(self):\n        print(f"{self.name}가 야옹!")\n\ndog = Dog("바둑이")\ncat = Cat("나비")\ndog.speak()\ncat.speak()',
+    concepts:["클래스 상속","메서드 오버라이딩","다형성","super() / self"]},
+
+    {id:3,title:"이진 탐색",difficulty:"⭐⭐⭐",description:"이진 탐색 알고리즘을 구현하세요.",
+    task:'정렬된 리스트에서 target을 이진 탐색으로 찾으세요.\n찾으면 인덱스, 없으면 -1을 반환하세요.\n\nnums = [2,5,8,12,16,23,38,56,72,91]\nbinary_search(nums, 23) → 5\nbinary_search(nums, 10) → -1',
+    hints:[{label:"힌트 1: 원리",detail:"중간값과 비교 → 작으면 왼쪽, 크면 오른쪽\n범위를 절반씩 줄여나감"},{label:"힌트 2: 포인터",detail:"left = 0, right = len(nums)-1\nmid = (left + right) // 2"},{label:"💡 정답 보기",detail:'def binary_search(nums, target):\n    left = 0\n    right = len(nums) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if nums[mid] == target:\n            return mid\n        elif nums[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1\n\nnums = [2,5,8,12,16,23,38,56,72,91]\nprint(binary_search(nums, 23))\nprint(binary_search(nums, 10))'}],
+    starterCode:'def binary_search(nums, target):\n    # 이진 탐색을 구현하세요\n    pass\n\nnums = [2,5,8,12,16,23,38,56,72,91]\nprint(binary_search(nums, 23))\nprint(binary_search(nums, 10))',
+    sampleAnswer:'def binary_search(nums, target):\n    left = 0\n    right = len(nums) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if nums[mid] == target:\n            return mid\n        elif nums[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1\n\nnums = [2,5,8,12,16,23,38,56,72,91]\nprint(binary_search(nums, 23))\nprint(binary_search(nums, 10))',
+    concepts:["이진 탐색","O(log n) 시간복잡도","투 포인터","while 반복문"]},
+
+    {id:4,title:"스택으로 괄호 검사",difficulty:"⭐⭐⭐⭐",description:"괄호가 올바른지 검사하는 함수를 만드세요.",
+    task:'문자열의 괄호 짝이 맞는지 검사하세요.\n() [] {} 세 종류를 모두 처리해야 합니다.\n\nis_valid("([{}])") → True\nis_valid("([)]") → False\nis_valid("{[}") → False',
+    hints:[{label:"힌트 1: 스택 활용",detail:"여는 괄호 → 스택에 push\n닫는 괄호 → 스택에서 pop하여 짝 비교"},{label:"힌트 2: 매핑",detail:'짝을 딕셔너리로 매핑\npairs = {")":"(", "]":"[", "}":"{"}'},{label:"💡 정답 보기",detail:'def is_valid(s):\n    stack = []\n    pairs = {")":"(", "]":"[", "}":"{"}\n    for ch in s:\n        if ch in "([{":\n            stack.append(ch)\n        elif ch in ")]}":\n            if len(stack) == 0:\n                return False\n            top = stack.pop()\n            if top != pairs[ch]:\n                return False\n    return len(stack) == 0\n\nprint(is_valid("([{}])"))\nprint(is_valid("([)]"))\nprint(is_valid("{[}"))'}],
+    starterCode:'def is_valid(s):\n    # 괄호 검사를 구현하세요\n    pass\n\nprint(is_valid("([{}])"))\nprint(is_valid("([)]"))\nprint(is_valid("{[}"))',
+    sampleAnswer:'def is_valid(s):\n    stack = []\n    pairs = {")":"(", "]":"[", "}":"{"}\n    for ch in s:\n        if ch in "([{":\n            stack.append(ch)\n        elif ch in ")]}":\n            if len(stack) == 0:\n                return False\n            top = stack.pop()\n            if top != pairs[ch]:\n                return False\n    return len(stack) == 0\n\nprint(is_valid("([{}])"))\nprint(is_valid("([)]"))\nprint(is_valid("{[}"))',
+    concepts:["스택 자료구조",".append() / .pop()","괄호 매칭","딕셔너리 매핑"]},
+
+    {id:5,title:"동적 프로그래밍",difficulty:"⭐⭐⭐⭐⭐",description:"계단 오르기 문제를 DP로 풀어보세요.",
+    task:'n개의 계단을 오르는 방법의 수를 구하세요.\n한 번에 1칸 또는 2칸 오를 수 있습니다.\n\nclimb(1) → 1가지\nclimb(2) → 2가지\nclimb(3) → 3가지\nclimb(5) → 8가지\n\n1~10까지 결과를 출력하세요.',
+    hints:[{label:"힌트 1: 점화식",detail:"n번째 계단에 도달하는 방법 =\n(n-1)번째에서 1칸 + (n-2)번째에서 2칸\ndp[n] = dp[n-1] + dp[n-2]"},{label:"힌트 2: 초기값",detail:"dp[1] = 1 (한 칸)\ndp[2] = 2 (1+1 또는 2)"},{label:"💡 정답 보기",detail:'def climb(n):\n    if n <= 1:\n        return 1\n    if n == 2:\n        return 2\n    dp = [0] * (n + 1)\n    dp[1] = 1\n    dp[2] = 2\n    for i in range(3, n + 1):\n        dp[i] = dp[i-1] + dp[i-2]\n    return dp[n]\n\nfor i in range(1, 11):\n    print(f"climb({i}) = {climb(i)}")'}],
+    starterCode:'def climb(n):\n    # DP로 계단 오르기를 구현하세요\n    pass\n\nfor i in range(1, 11):\n    print(f"climb({i}) = {climb(i)}")',
+    sampleAnswer:'def climb(n):\n    if n <= 1:\n        return 1\n    if n == 2:\n        return 2\n    dp = [0] * (n + 1)\n    dp[1] = 1\n    dp[2] = 2\n    for i in range(3, n + 1):\n        dp[i] = dp[i-1] + dp[i-2]\n    return dp[n]\n\nfor i in range(1, 11):\n    print(f"climb({i}) = {climb(i)}")',
+    concepts:["동적 프로그래밍","점화식","메모이제이션","Bottom-up 방식"]}
+  ]
+}
+};
+
+// ==================== STATE ====================
+let currentCourse=null,currentStage=0,code='',openHints={},completedStages=new Set(),showConcepts=false,showAnswer=false,savedCodes={},lastRunResult=null;
+function saveP(){try{localStorage.setItem('pyD5',JSON.stringify({course:currentCourse,s:currentStage,c:[...completedStages],codes:savedCodes}))}catch(e){}}
+function loadP(){try{const r=localStorage.getItem('pyD5');if(r){const d=JSON.parse(r);if(d.course)currentCourse=d.course;if(typeof d.s==='number')currentStage=d.s;if(d.c)d.c.forEach(i=>completedStages.add(i));if(d.codes)savedCodes=d.codes;}}catch(e){}}
+loadP();
+
+// ==================== MINI PYTHON INTERPRETER ====================
+function miniPython(src){const output=[];const globals={};const funcs={};const classes={};
+const builtins={len:a=>Array.isArray(a)?a.length:typeof a==='string'?a.length:typeof a==='object'?Object.keys(a).length:0,sum:a=>a.reduce((x,y)=>x+y,0),range:(...a)=>{let s=0,e=0,st=1;if(a.length===1)e=a[0];else if(a.length>=2){s=a[0];e=a[1];if(a[2])st=a[2]}const r=[];if(st>0)for(let i=s;i<e;i+=st)r.push(i);else for(let i=s;i>e;i+=st)r.push(i);return r},int:a=>parseInt(a),float:a=>parseFloat(a),str:a=>pyStr(a),abs:a=>Math.abs(a),min:(...a)=>{const arr=a.length===1&&Array.isArray(a[0])?a[0]:a;return Math.min(...arr)},max:(...a)=>{const arr=a.length===1&&Array.isArray(a[0])?a[0]:a;return Math.max(...arr)},sorted:a=>[...a].sort((x,y)=>x-y),reversed:a=>[...a].reverse(),round:(a,n)=>n!==undefined?parseFloat(a.toFixed(n)):Math.round(a),print:(...args)=>{output.push(args.map(a=>pyStr(a)).join(' '))},enumerate:a=>a.map((v,i)=>[i,v]),zip:(...arrs)=>{const m=Math.min(...arrs.map(a=>a.length));const r=[];for(let i=0;i<m;i++)r.push(arrs.map(a=>a[i]));return r},list:a=>Array.isArray(a)?[...a]:typeof a==='string'?a.split(''):a,bool:a=>!!a};
+function pyStr(v){if(v===null||v===undefined)return'None';if(v===true)return'True';if(v===false)return'False';if(typeof v==='string')return v;if(Array.isArray(v))return'['+v.map(pyRepr).join(', ')+']';if(typeof v==='object'&&v.__class__){return`<${v.__class__} object>`}if(typeof v==='object')return'{'+Object.entries(v).map(([k,val])=>pyRepr(k)+': '+pyRepr(val)).join(', ')+'}';return String(v)}
+function pyRepr(v){if(typeof v==='string')return"'"+v+"'";return pyStr(v)}
+function indent(l){const m=l.match(/^(\s*)/);return m?m[1].length:0}
+function evalExpr(expr,scope){expr=expr.trim();if(expr==='')return undefined;if(expr==='True')return true;if(expr==='False')return false;if(expr==='None')return null;if(expr==='pass')return undefined;let js=expr;
+js=js.replace(/f(["'])(.*?)\1/g,(m,q,c)=>{const r=c.replace(/\{([^}]+)\}/g,(m,inner)=>{const ci=inner.indexOf(':');if(ci!==-1){const vp=inner.substring(0,ci).trim(),fp=inner.substring(ci+1).trim(),fm=fp.match(/^\.(\d+)f$/);if(fm)return'${('+vp+').toFixed('+fm[1]+')}';return'${'+vp+'}'}return'${'+inner+'}'});return'`'+r+'`'});
+js=js.replace(/(\w+)\.items\(\)/g,'Object.entries($1)');js=js.replace(/(\w+)\.keys\(\)/g,'Object.keys($1)');js=js.replace(/(\w+)\.values\(\)/g,'Object.values($1)');js=js.replace(/(\w+)\.append\((.+?)\)/g,'$1.push($2)');js=js.replace(/(\w+)\.pop\(\)/g,'$1.pop()');js=js.replace(/(\w+)\.upper\(\)/g,'$1.toUpperCase()');js=js.replace(/(\w+)\.lower\(\)/g,'$1.toLowerCase()');js=js.replace(/(\w+)\.strip\(\)/g,'$1.trim()');js=js.replace(/(\w+)\.split\(\)/g,'$1.split(" ").filter(x=>x)');js=js.replace(/(\w+)\.split\((.+?)\)/g,'$1.split($2)');
+js=js.replace(/(\w+)\.join\(\[(.+?)\]\)/g,'[$2].join($1)');
+js=js.replace(/\bTrue\b/g,'true');js=js.replace(/\bFalse\b/g,'false');js=js.replace(/\bNone\b/g,'null');js=js.replace(/\band\b/g,'&&');js=js.replace(/\bor\b/g,'||');js=js.replace(/\bnot\b/g,'!');
+// "in" operator for strings and dicts
+js=js.replace(/(.+?)\s+in\s+"([^"]+)"/g,'"$2".includes($1)');
+js=js.replace(/(.+?)\s+in\s+'([^']+)'/g,"'$2'.includes($1)");
+// "x in dict" for dicts — handled by JS 'in' operator naturally
+// Constructor calls: ClassName(args)
+for(const cn in classes){const re=new RegExp('\\b'+cn+'\\(','g');js=js.replace(re,'__new_'+cn+'(');}
+const sv={...builtins,...globals,...scope};for(const cn in classes){sv['__new_'+cn]=(...args)=>{const obj={__class__:cn};const cls=classes[cn];if(cls.__init__){const localScope={self:obj};cls.__init__.params.slice(1).forEach((p,i)=>{localScope[p]=args[i]});execFunc(cls.__init__.body,{...sv,...localScope},0,cls.__init__.indent+4,{returned:false,value:undefined});}return obj};}
+const vn=Object.keys(sv);const vv=Object.values(sv);try{return new Function(...vn,'return ('+js+')').apply(null,vv)}catch(e){throw'SyntaxError: 표현식 오류 — '+expr}}
+function parseAssign(line){let d=0,inS=false,sC='';for(let i=0;i<line.length;i++){const c=line[i];if(inS){if(c===sC&&line[i-1]!=='\\')inS=false;continue}if(c==='"'||c==="'"){inS=true;sC=c;continue}if('([{'.includes(c))d++;if(')]}'.includes(c))d--;if(d===0&&c==='='&&line[i-1]!=='!'&&line[i-1]!=='>'&&line[i-1]!=='<'&&line[i+1]!=='=')return{target:line.substring(0,i).trim(),value:line.substring(i+1).trim()}}return null}
+function splitArgs(s){const a=[];let d=0,cur='',inS=false,sC='';for(let i=0;i<s.length;i++){const c=s[i];if(inS){cur+=c;if(c===sC&&s[i-1]!=='\\')inS=false;continue}if(c==='"'||c==="'"){inS=true;sC=c;cur+=c;continue}if('([{'.includes(c))d++;if(')]}'.includes(c))d--;if(c===','&&d===0){a.push(cur);cur='';continue}cur+=c}if(cur.trim())a.push(cur);return a}
+function execBlock(lines,scope,si,bi){let i=si;while(i<lines.length){const raw=lines[i],tr=raw.trim(),ind=indent(raw);if(tr===''||tr.startsWith('#')){i++;continue}if(ind<bi)return i;
+// class
+const clsM=tr.match(/^class\s+(\w+)(?:\((\w+)\))?\s*:/);
+if(clsM){const cn=clsM[1],parent=clsM[2];const bS=i+1;let bE=bS;while(bE<lines.length&&(lines[bE].trim()===''||indent(lines[bE])>ind))bE++;classes[cn]={methods:{},parent:parent||null};
+// Parse methods inside class
+let j=bS;while(j<bE){const mtr=lines[j].trim();const mInd=indent(lines[j]);const defM=mtr.match(/^def\s+(\w+)\s*\(([^)]*)\)\s*:/);if(defM){const mn=defM[1],mp=defM[2].split(',').map(p=>p.trim()).filter(p=>p);const mbS=j+1;let mbE=mbS;while(mbE<bE&&(lines[mbE].trim()===''||indent(lines[mbE])>mInd))mbE++;classes[cn][mn]={params:mp,body:lines.slice(mbS,mbE),indent:mInd};
+// Register as callable method
+if(mn!=='__init__'){const mName=mn;globals[cn+'.'+mName]=true;}
+j=mbE;continue}j++}
+// If has parent, inherit
+if(parent&&classes[parent]){for(const k in classes[parent]){if(k!=='methods'&&k!=='parent'&&!classes[cn][k])classes[cn][k]=classes[parent][k]}}
+// Handle method calls on instances
+i=bE;continue}
+const defM=tr.match(/^def\s+(\w+)\s*\(([^)]*)\)\s*:/);if(defM){const fn=defM[1],pm=defM[2].split(',').map(p=>p.trim()).filter(p=>p);const bS=i+1;let bE=bS;while(bE<lines.length&&(lines[bE].trim()===''||indent(lines[bE])>ind))bE++;const bodyLines=lines.slice(bS,bE);funcs[fn]=(...args)=>{const ls={...scope};pm.forEach((p,idx)=>{ls[p]=args[idx]});globals[fn]=funcs[fn];builtins[fn]=funcs[fn];const result={returned:false,value:undefined};execFunc(bodyLines,ls,0,ind+4,result);return result.value};globals[fn]=funcs[fn];builtins[fn]=funcs[fn];i=bE;continue}
+const forM=tr.match(/^for\s+(.+?)\s+in\s+(.+?)\s*:/);if(forM){const vp=forM[1].trim(),ie=forM[2].trim(),iter=evalExpr(ie,scope);const bS=i+1;let bE=bS;while(bE<lines.length&&(lines[bE].trim()===''||indent(lines[bE])>ind))bE++;
+for(const item of iter){if(vp.includes(',')){const vs=vp.split(',').map(v=>v.trim());if(Array.isArray(item))vs.forEach((v,idx)=>{scope[v]=item[idx];globals[v]=item[idx]})}else{scope[vp]=item;globals[vp]=item}execBlock(lines,scope,bS,ind+4)}i=bE;continue}
+const whM=tr.match(/^while\s+(.+?)\s*:/);if(whM){const bS=i+1;let bE=bS;while(bE<lines.length&&(lines[bE].trim()===''||indent(lines[bE])>ind))bE++;let sf=0;while(evalExpr(whM[1],scope)&&sf<50000){execBlock(lines,scope,bS,ind+4);sf++}i=bE;continue}
+const ifM=tr.match(/^if\s+(.+?)\s*:/);if(ifM){const r=handleIf(lines,i,scope,ind);i=r;continue}
+const prM=tr.match(/^print\s*\((.*)\)$/s);if(prM!==null){const as=prM[1]!==undefined?prM[1].trim():'';if(as==='')output.push('');else{const args=splitArgs(as);output.push(args.map(a=>pyStr(evalExpr(a.trim(),scope))).join(' '))}i++;continue}
+// Method call on object: obj.method(args)
+const methCall=tr.match(/^(\w+)\.(\w+)\(([^)]*)\)$/);
+if(methCall){const objName=methCall[1],methName=methCall[2],argsStr=methCall[3];const obj=scope[objName]||globals[objName];if(obj&&typeof obj==='object'&&obj.__class__){const cls=classes[obj.__class__];if(cls&&cls[methName]){const mp=cls[methName].params;const args=argsStr?splitArgs(argsStr).map(a=>evalExpr(a.trim(),scope)):[];const ls={self:obj,...scope};mp.slice(1).forEach((p,idx)=>{ls[p]=args[idx]});const result={returned:false,value:undefined};execFunc(cls[methName].body,ls,0,cls[methName].indent+4,result);i++;continue}}
+if(obj&&Array.isArray(obj)){if(methName==='append'){obj.push(evalExpr(argsStr,scope));i++;continue}if(methName==='pop'){obj.pop();i++;continue}}i++;continue}
+const assign=parseAssign(tr);if(assign){const val=evalExpr(assign.value,scope);if(assign.target.includes(',')){const ts=assign.target.split(',').map(t=>t.trim());if(Array.isArray(val))ts.forEach((t,idx)=>{scope[t]=val[idx];globals[t]=val[idx]})}else{const idxM=assign.target.match(/^(\w+)\[(.+)\]$/);if(idxM){const arr=scope[idxM[1]]||globals[idxM[1]];arr[evalExpr(idxM[2],scope)]=val}else{
+// Check if setting attribute: obj.attr = val
+const dotM=assign.target.match(/^(\w+)\.(\w+)$/);if(dotM){const obj=scope[dotM[1]]||globals[dotM[1]];if(obj)obj[dotM[2]]=val}else{scope[assign.target]=val;globals[assign.target]=val}}}i++;continue}
+try{evalExpr(tr,scope)}catch(e){}i++}return i}
+function execFunc(lines,scope,si,bi,result){let i=si;while(i<lines.length){const raw=lines[i],tr=raw.trim(),ind=indent(raw);if(tr===''||tr.startsWith('#')){i++;continue}if(ind<bi&&tr!=='')return i;
+const retM=tr.match(/^return\s*(.*)/);if(retM){result.value=retM[1].trim()?evalExpr(retM[1].trim(),scope):null;result.returned=true;return i}
+const forM=tr.match(/^for\s+(.+?)\s+in\s+(.+?)\s*:/);if(forM){const vp=forM[1].trim(),iter=evalExpr(forM[2].trim(),scope);const bS=i+1;let bE=bS;while(bE<lines.length&&(lines[bE].trim()===''||indent(lines[bE])>ind))bE++;for(const item of iter){if(vp.includes(',')){const vs=vp.split(',').map(v=>v.trim());if(Array.isArray(item))vs.forEach((v,idx)=>{scope[v]=item[idx]})}else{scope[vp]=item}execFunc(lines,scope,bS,ind+4,result);if(result.returned)return i}i=bE;continue}
+const whM=tr.match(/^while\s+(.+?)\s*:/);if(whM){const bS=i+1;let bE=bS;while(bE<lines.length&&(lines[bE].trim()===''||indent(lines[bE])>ind))bE++;let sf=0;while(evalExpr(whM[1],scope)&&sf<50000){execFunc(lines,scope,bS,ind+4,result);if(result.returned)return i;sf++}i=bE;continue}
+const ifM=tr.match(/^if\s+(.+?)\s*:/);if(ifM){const r=handleIfFunc(lines,i,scope,ind,result);if(result.returned)return i;i=r;continue}
+const prM=tr.match(/^print\s*\((.*)\)$/s);if(prM!==null){const as=prM[1]!==undefined?prM[1].trim():'';if(as==='')output.push('');else output.push(splitArgs(as).map(a=>pyStr(evalExpr(a.trim(),scope))).join(' '));i++;continue}
+// Method call inside function
+const methCall=tr.match(/^(\w+)\.(\w+)\(([^)]*)\)$/);
+if(methCall){const objName=methCall[1],methName=methCall[2],argsStr=methCall[3];const obj=scope[objName]||globals[objName];if(obj&&typeof obj==='object'&&obj.__class__){const cls=classes[obj.__class__];if(cls&&cls[methName]){const mp=cls[methName].params;const args=argsStr?splitArgs(argsStr).map(a=>evalExpr(a.trim(),scope)):[];const ls={self:obj,...scope};mp.slice(1).forEach((p,idx)=>{ls[p]=args[idx]});const r2={returned:false,value:undefined};execFunc(cls[methName].body,ls,0,cls[methName].indent+4,r2);i++;continue}}
+if(obj&&Array.isArray(obj)&&methName==='append'){obj.push(evalExpr(argsStr,scope));i++;continue}i++;continue}
+const assign=parseAssign(tr);if(assign){const val=evalExpr(assign.value,scope);if(assign.target.includes(',')){const ts=assign.target.split(',').map(t=>t.trim());if(Array.isArray(val))ts.forEach((t,idx)=>{scope[t]=val[idx]})}else{const idxM=assign.target.match(/^(\w+)\[(.+)\]$/);if(idxM){const arr=scope[idxM[1]]||globals[idxM[1]];arr[evalExpr(idxM[2],scope)]=val}else{const dotM=assign.target.match(/^(\w+)\.(\w+)$/);if(dotM){const obj=scope[dotM[1]];if(obj)obj[dotM[2]]=val}else scope[assign.target]=val}}i++;continue}
+try{evalExpr(tr,scope)}catch(e){}i++}return i}
+function handleIf(lines,si,scope,bi){let i=si;const cond=evalExpr(lines[i].trim().match(/^if\s+(.+?)\s*:/)[1],scope);const bS=i+1;let bE=bS;while(bE<lines.length&&(lines[bE].trim()===''||indent(lines[bE])>bi))bE++;let exec=false;if(cond){execBlock(lines,scope,bS,bi+4);exec=true}i=bE;
+while(i<lines.length){const t=lines[i].trim(),ind=indent(lines[i]);if(ind!==bi)break;const em=t.match(/^elif\s+(.+?)\s*:/);if(em){const eS=i+1;let eE=eS;while(eE<lines.length&&(lines[eE].trim()===''||indent(lines[eE])>bi))eE++;if(!exec&&evalExpr(em[1],scope)){execBlock(lines,scope,eS,bi+4);exec=true}i=eE;continue}const el=t.match(/^else\s*:/);if(el){const eS=i+1;let eE=eS;while(eE<lines.length&&(lines[eE].trim()===''||indent(lines[eE])>bi))eE++;if(!exec)execBlock(lines,scope,eS,bi+4);i=eE;continue}break}return i}
+function handleIfFunc(lines,si,scope,bi,result){let i=si;const cond=evalExpr(lines[i].trim().match(/^if\s+(.+?)\s*:/)[1],scope);const bS=i+1;let bE=bS;while(bE<lines.length&&(lines[bE].trim()===''||indent(lines[bE])>bi))bE++;let exec=false;if(cond){execFunc(lines,scope,bS,bi+4,result);exec=true}i=bE;
+while(i<lines.length){const t=lines[i].trim(),ind=indent(lines[i]);if(ind!==bi)break;const em=t.match(/^elif\s+(.+?)\s*:/);if(em){const eS=i+1;let eE=eS;while(eE<lines.length&&(lines[eE].trim()===''||indent(lines[eE])>bi))eE++;if(!exec&&evalExpr(em[1],scope)){execFunc(lines,scope,eS,bi+4,result);exec=true}i=eE;continue}const el=t.match(/^else\s*:/);if(el){const eS=i+1;let eE=eS;while(eE<lines.length&&(lines[eE].trim()===''||indent(lines[eE])>bi))eE++;if(!exec)execFunc(lines,scope,eS,bi+4,result);i=eE;continue}break}return i}
+try{execBlock(src.split('\n'),{},0,0);return{success:true,output:output.join('\n')||'(출력 없음 — print()를 사용해보세요)',error:''}}catch(e){const em=typeof e==='string'?e:(e.message||String(e));let ce=em;if(em.includes('is not defined'))ce='NameError: '+em;else if(em.includes('is not a function'))ce='TypeError: '+em;else if(em.includes('Unexpected'))ce='SyntaxError: 문법 오류입니다. 들여쓰기와 콜론(:)을 확인하세요.';return{success:false,output:output.join('\n'),error:ce}}}
+
+function executeCode(){const t=performance.now();const r=miniPython(code);r.time=performance.now()-t;lastRunResult=r;renderOutput()}
+function renderOutput(){const a=document.getElementById('outputArea');if(!a||!lastRunResult)return;const r=lastRunResult,t=r.time?(r.time<1?'<1':Math.round(r.time))+'ms':'';if(r.success)a.innerHTML=`<div class="output-wrap"><div class="output-header success"><span><span class="status-dot"></span>✅ 실행 성공</span><span class="output-time">${t}</span></div><div class="output-body success-text">${escH(r.output)}</div></div>`;else{let b='';if(r.output)b+=escH(r.output)+'\n\n';b+=escH(r.error);a.innerHTML=`<div class="output-wrap"><div class="output-header error"><span><span class="status-dot"></span>❌ 오류 발생</span><span class="output-time">${t}</span></div><div class="output-body error-text">${b}</div></div>`}}
+
+// ==================== RENDER ====================
+function escH(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function getStages(){return COURSES[currentCourse].stages}
+function getS(){return getStages()[currentStage]}
+function getCourseKey(){return currentCourse+'-'+currentStage}
+
+function renderCourseSelect(){
+  const mc=document.getElementById('mainContent');
+  mc.innerHTML=`
+  <div class="course-select">
+    <h2>🎯 코스를 선택하세요</h2>
+    <p>자신의 수준에 맞는 코스를 골라 시작하세요</p>
+    <div class="course-cards">
+      ${Object.entries(COURSES).map(([key,c])=>`
+        <div class="course-card card-${c.color}" onclick="selectCourse('${key}')">
+          <span class="emoji">${c.emoji}</span>
+          <h3>${c.name}</h3>
+          <div class="level-desc">${c.desc}</div>
+          <div class="topics">${c.topics.map(t=>`<span class="topic-tag">${t}</span>`).join('')}</div>
+          <div class="start-label">시작하기 →</div>
+        </div>
+      `).join('')}
+    </div>
+  </div>`;
+}
+
+function renderPractice(){
+  const mc=document.getElementById('mainContent');
+  const c=COURSES[currentCourse];const stages=getStages();const s=getS();
+  const progPct=(completedStages.size/stages.length*100);
+  const colorMap={beginner:'#2ea043',intermediate:'#e8a317',advanced:'#e05555'};
+  const progColor=colorMap[c.color]||'#3776AB';
+
+  let tabs=stages.map((st,i)=>`<button class="stage-tab tab-${c.color}${i===currentStage?' active':''}${completedStages.has(getCK(i))?' done':''}" onclick="goTo(${i})">${completedStages.has(getCK(i))?'✓ ':''}${st.id}단계</button>`).join('');
+  let hints=s.hints.map((h,i)=>{const isA=i===s.hints.length-1;return`<button class="accordion-btn ${isA?'hint-btn answer-btn':'hint-btn'}" onclick="togH(${i})"><span>${h.label}</span><span class="arrow ${openHints[i]?'open':''}">▾</span></button><div class="accordion-content ${openHints[i]?'open':''}"><div class="hint-content"><pre>${escH(h.detail)}</pre></div></div>`}).join('');
+  const isDone=completedStages.has(getCourseKey());
+  let ansH='';if(showAnswer)ansH=`<div class="answer-panel"><div class="answer-header">✅ 모범 답안</div><pre class="answer-code">${escH(s.sampleAnswer)}</pre><button class="copy-to-editor" onclick="cpAns()">에디터에 복사하기</button></div>`;
+  const lines=code.split('\n');
+
+  mc.innerHTML=`
+  <div class="course-badge badge-${c.color}" onclick="backToCourse()" title="코스 선택으로 돌아가기">← ${c.emoji} ${c.name} 코스</div>
+  <div class="progress-bar"><div class="progress-fill" style="width:${progPct}%;background:linear-gradient(90deg,${progColor},${progColor}88)"></div></div>
+  <div class="stage-tabs">${tabs}</div>
+  <div class="main-grid">
+    <div>
+      <div class="card"><div class="stage-header"><span class="stage-label label-${c.color}">STAGE ${s.id}</span><span class="stage-difficulty">${s.difficulty}</span></div><div class="stage-title">${s.title}</div><div class="stage-desc">${s.description}</div><div class="task-box"><div class="task-label">📋 문제</div><div class="task-text">${escH(s.task)}</div></div></div>
+      <button class="accordion-btn concept-btn" onclick="togC()"><span>📚 핵심 개념</span><span class="arrow ${showConcepts?'open':''}">▾</span></button><div class="accordion-content ${showConcepts?'open':''}"><div class="concept-content"><div class="concept-tags">${s.concepts.map(c=>`<span class="concept-tag">${c}</span>`).join('')}</div></div></div>
+      ${hints}
+    </div>
+    <div>
+      <div class="editor-wrap"><div class="editor-header"><div class="traffic-lights"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="filename">stage${s.id}.py</span></div><button class="reset-btn" onclick="rstCode()">↺ 초기화</button></div><div class="editor-body"><div class="line-numbers" id="lineNumbers">${lines.map((_,i)=>`<div>${i+1}</div>`).join('')}</div><textarea class="code-textarea" id="codeArea" spellcheck="false" oninput="onIn(this)" onkeydown="onK(event)">${escH(code)}</textarea></div><div class="editor-footer"><span>${lines.length} lines</span><span>Python 3</span></div></div>
+      <button class="btn-run" onclick="executeCode()">▶ 실행하기</button>
+      <div id="outputArea"></div>
+      <div class="actions"><button class="btn-view-answer" onclick="togA()">${showAnswer?'정답 숨기기':'👀 정답 확인'}</button><button class="btn-complete ${isDone?'done':''}" onclick="markDone()">${isDone?'✓ 완료됨':'✓ 완료 표시'}</button></div>
+      ${ansH}
+      <div class="nav-btns"><button class="nav-btn" ${currentStage===0?'disabled':''} onclick="goTo(${currentStage-1})">← 이전</button><button class="nav-btn" ${currentStage===stages.length-1?'disabled':''} onclick="goTo(${currentStage+1})">다음 →</button></div>
+    </div>
+  </div>`;
+  if(lastRunResult)renderOutput();
+}
+
+function render(){if(!currentCourse)renderCourseSelect();else renderPractice()}
+
+// Helpers
+function getCK(i){return currentCourse+'-'+i}
+function selectCourse(key){currentCourse=key;currentStage=0;code=COURSES[key].stages[0].starterCode;completedStages=new Set();savedCodes={};openHints={};showConcepts=false;showAnswer=false;lastRunResult=null;
+// Load saved progress for this course
+try{const r=localStorage.getItem('pyD5_'+key);if(r){const d=JSON.parse(r);if(d.s!==undefined)currentStage=d.s;if(d.c)d.c.forEach(i=>completedStages.add(i));if(d.codes)savedCodes=d.codes;code=savedCodes[getCourseKey()]||COURSES[key].stages[currentStage].starterCode;}}catch(e){}
+render();saveP()}
+function backToCourse(){currentCourse=null;render()}
+function goTo(i){if(i<0||i>=getStages().length)return;savedCodes[getCourseKey()]=code;currentStage=i;code=savedCodes[getCK(i)]||getStages()[i].starterCode;openHints={};showConcepts=false;showAnswer=false;lastRunResult=null;render();saveCourse();window.scrollTo({top:0,behavior:'smooth'})}
+function togH(i){openHints[i]=!openHints[i];render()}
+function togC(){showConcepts=!showConcepts;render()}
+function togA(){showAnswer=!showAnswer;render()}
+function rstCode(){code=getS().starterCode;savedCodes[getCourseKey()]=code;lastRunResult=null;render();saveCourse()}
+function cpAns(){code=getS().sampleAnswer;savedCodes[getCourseKey()]=code;render();saveCourse()}
+function markDone(){completedStages.add(getCourseKey());savedCodes[getCourseKey()]=code;render();saveCourse();const c=document.getElementById('celebration');c.style.display='flex';setTimeout(()=>c.style.display='none',1800)}
+function onIn(el){code=el.value;savedCodes[getCourseKey()]=code;document.getElementById('lineNumbers').innerHTML=code.split('\n').map((_,i)=>`<div>${i+1}</div>`).join('');saveCourse()}
+function onK(e){if(e.key==='Tab'){e.preventDefault();const t=e.target,s=t.selectionStart,end=t.selectionEnd;code=t.value.substring(0,s)+'    '+t.value.substring(end);t.value=code;t.selectionStart=t.selectionEnd=s+4;savedCodes[getCourseKey()]=code;document.getElementById('lineNumbers').innerHTML=code.split('\n').map((_,i)=>`<div>${i+1}</div>`).join('');saveCourse()}}
+function saveCourse(){if(!currentCourse)return;try{localStorage.setItem('pyD5_'+currentCourse,JSON.stringify({s:currentStage,c:[...completedStages],codes:savedCodes}))}catch(e){}}
+
+render();
+</script>
+</body>
+</html>
