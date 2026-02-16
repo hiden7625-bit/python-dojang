@@ -334,51 +334,51 @@ let waveCount = 0;
 
 // Weapon definitions
 const WEAPONS = {
-  1: { name: 'LV.1 기본 기관포', fireRate: 180, color: '#4af', damage: 1 },
-  2: { name: 'LV.2 더블 기관포', fireRate: 160, color: '#4f8', damage: 1 },
-  3: { name: 'LV.3 트리플 캐논', fireRate: 140, color: '#fa4', damage: 1.5 },
-  4: { name: 'LV.4 스프레드 캐논', fireRate: 120, color: '#f4a', damage: 2 },
-  5: { name: 'LV.MAX 메가 캐논', fireRate: 100, color: '#f44', damage: 3 }
+  1: { name: 'LV.1 기본 기관포', fireRate: 170, color: '#4af', damage: 1 },
+  2: { name: 'LV.2 더블 캐논', fireRate: 145, color: '#4fc', damage: 1.8 },
+  3: { name: 'LV.3 트리플 캐논', fireRate: 120, color: '#fa4', damage: 2.8 },
+  4: { name: 'LV.4 스프레드 캐논', fireRate: 95, color: '#f64', damage: 4 },
+  5: { name: 'LV.MAX 메가 캐논', fireRate: 75, color: '#ff4', damage: 6 }
 };
 
 function fireBullets() {
   const w = WEAPONS[player.weaponLevel];
   const cx = player.x;
   const cy = player.y - player.h / 2;
-  const bSpeed = 10;
+  const bSpeed = 10 + player.weaponLevel * 0.8;
 
   switch (player.weaponLevel) {
     case 1:
       bullets.push({ x: cx, y: cy, vx: 0, vy: -bSpeed, w: 4, h: 14, color: w.color, damage: w.damage });
       break;
     case 2:
-      bullets.push({ x: cx - 10, y: cy, vx: 0, vy: -bSpeed, w: 4, h: 14, color: w.color, damage: w.damage });
-      bullets.push({ x: cx + 10, y: cy, vx: 0, vy: -bSpeed, w: 4, h: 14, color: w.color, damage: w.damage });
+      bullets.push({ x: cx - 10, y: cy, vx: 0, vy: -bSpeed, w: 5, h: 16, color: w.color, damage: w.damage });
+      bullets.push({ x: cx + 10, y: cy, vx: 0, vy: -bSpeed, w: 5, h: 16, color: w.color, damage: w.damage });
       break;
     case 3:
-      bullets.push({ x: cx, y: cy, vx: 0, vy: -bSpeed, w: 5, h: 16, color: w.color, damage: w.damage });
-      bullets.push({ x: cx - 14, y: cy + 6, vx: -1.5, vy: -bSpeed, w: 4, h: 12, color: w.color, damage: w.damage });
-      bullets.push({ x: cx + 14, y: cy + 6, vx: 1.5, vy: -bSpeed, w: 4, h: 12, color: w.color, damage: w.damage });
+      bullets.push({ x: cx, y: cy, vx: 0, vy: -bSpeed, w: 6, h: 20, color: '#fff', damage: w.damage * 1.2 });
+      bullets.push({ x: cx - 14, y: cy + 6, vx: -1.8, vy: -bSpeed, w: 5, h: 16, color: w.color, damage: w.damage });
+      bullets.push({ x: cx + 14, y: cy + 6, vx: 1.8, vy: -bSpeed, w: 5, h: 16, color: w.color, damage: w.damage });
       break;
     case 4:
-      bullets.push({ x: cx, y: cy, vx: 0, vy: -bSpeed, w: 6, h: 18, color: w.color, damage: w.damage });
-      bullets.push({ x: cx - 12, y: cy + 4, vx: -1.2, vy: -bSpeed, w: 4, h: 14, color: w.color, damage: w.damage });
-      bullets.push({ x: cx + 12, y: cy + 4, vx: 1.2, vy: -bSpeed, w: 4, h: 14, color: w.color, damage: w.damage });
-      bullets.push({ x: cx - 22, y: cy + 10, vx: -2.8, vy: -bSpeed * 0.9, w: 3, h: 10, color: w.color, damage: w.damage });
-      bullets.push({ x: cx + 22, y: cy + 10, vx: 2.8, vy: -bSpeed * 0.9, w: 3, h: 10, color: w.color, damage: w.damage });
+      bullets.push({ x: cx, y: cy, vx: 0, vy: -bSpeed, w: 7, h: 22, color: '#fff', damage: w.damage * 1.3 });
+      bullets.push({ x: cx - 13, y: cy + 4, vx: -1.4, vy: -bSpeed, w: 5, h: 18, color: w.color, damage: w.damage });
+      bullets.push({ x: cx + 13, y: cy + 4, vx: 1.4, vy: -bSpeed, w: 5, h: 18, color: w.color, damage: w.damage });
+      bullets.push({ x: cx - 24, y: cy + 10, vx: -3, vy: -bSpeed * 0.9, w: 4, h: 14, color: w.color, damage: w.damage * 0.8 });
+      bullets.push({ x: cx + 24, y: cy + 10, vx: 3, vy: -bSpeed * 0.9, w: 4, h: 14, color: w.color, damage: w.damage * 0.8 });
       break;
     case 5:
-      for (let i = -3; i <= 3; i++) {
-        const angle = i * 0.12;
-        bullets.push({
-          x: cx + i * 8, y: cy + Math.abs(i) * 4,
-          vx: Math.sin(angle) * bSpeed * 0.4,
-          vy: -bSpeed + Math.abs(i) * 0.3,
-          w: i === 0 ? 7 : 4, h: i === 0 ? 20 : 14,
-          color: i === 0 ? '#fff' : w.color,
-          damage: i === 0 ? w.damage * 1.5 : w.damage
-        });
-      }
+      // Center mega beam
+      bullets.push({ x: cx, y: cy, vx: 0, vy: -bSpeed * 1.1, w: 9, h: 26, color: '#fff', damage: w.damage * 1.5 });
+      // Inner spread
+      bullets.push({ x: cx - 10, y: cy + 3, vx: -1, vy: -bSpeed, w: 6, h: 20, color: w.color, damage: w.damage });
+      bullets.push({ x: cx + 10, y: cy + 3, vx: 1, vy: -bSpeed, w: 6, h: 20, color: w.color, damage: w.damage });
+      // Outer spread
+      bullets.push({ x: cx - 22, y: cy + 8, vx: -2.5, vy: -bSpeed * 0.92, w: 5, h: 16, color: w.color, damage: w.damage * 0.8 });
+      bullets.push({ x: cx + 22, y: cy + 8, vx: 2.5, vy: -bSpeed * 0.92, w: 5, h: 16, color: w.color, damage: w.damage * 0.8 });
+      // Wide flankers
+      bullets.push({ x: cx - 32, y: cy + 14, vx: -4, vy: -bSpeed * 0.85, w: 4, h: 12, color: w.color, damage: w.damage * 0.6 });
+      bullets.push({ x: cx + 32, y: cy + 14, vx: 4, vy: -bSpeed * 0.85, w: 4, h: 12, color: w.color, damage: w.damage * 0.6 });
       break;
   }
 }
@@ -474,9 +474,10 @@ function spawnEnemies(dt) {
 function spawnItem(x, y) {
   const roll = Math.random();
   let type;
-  if (roll < 0.4) type = 'weapon';
-  else if (roll < 0.65) type = 'bomb';
-  else if (roll < 0.85) type = 'score';
+  if (player.weaponLevel < 5 && roll < 0.55) type = 'weapon';
+  else if (roll < 0.55) type = 'score';
+  else if (roll < 0.75) type = 'bomb';
+  else if (roll < 0.9) type = 'score';
   else type = 'heal';
 
   items.push({
@@ -848,32 +849,69 @@ function drawJet(x, y, w, h, dir, colors, flicker, opts) {
 }
 
 // Color presets for each jet type
-const PLAYER_COLORS = {
-  flameCore: 'rgb(80,180,255',
-  flameRGB: '50,120,255',
-  flameCoreRGB: '200,230,255',
-  nozzle: '#1a3050',
-  wingTip: '#15406a',
-  wingMid: '#2a6aaa',
-  wingRoot: '#3580c0',
-  wingEdge: 'rgba(100,180,255,0.4)',
-  stabColor: '#1a4a7a',
-  bodyEdge: '#1a4a80',
-  bodyLight: '#b0c8e0',
-  bodyCenter: '#d8e8f4',
-  bodyStroke: 'rgba(100,170,230,0.5)',
-  intake: '#2a5080',
-  centerLine: 'rgba(40,120,220,0.5)',
-  finColor: '#1a4a80',
-  canopyTop: 'rgba(160,220,255,0.95)',
-  canopyMid: 'rgba(80,180,255,0.8)',
-  canopyBottom: 'rgba(40,120,200,0.6)',
-  canopyEdge: 'rgba(180,230,255,0.7)',
-  noseTip: 'rgba(100,200,255,0.7)',
-  markOuter: 'rgba(255,255,255,0.5)',
-  markInner: 'rgba(50,120,220,0.8)',
-  missileColor: '#3a6a9a'
-};
+const PLAYER_LEVEL_COLORS = [
+  null,
+  { // LV1 - 기본 블루/실버
+    flameCore: 'rgb(80,180,255', flameRGB: '50,120,255', flameCoreRGB: '200,230,255',
+    nozzle: '#1a3050', wingTip: '#15406a', wingMid: '#2a6aaa', wingRoot: '#3580c0',
+    wingEdge: 'rgba(100,180,255,0.4)', stabColor: '#1a4a7a',
+    bodyEdge: '#1a4a80', bodyLight: '#b0c8e0', bodyCenter: '#d8e8f4',
+    bodyStroke: 'rgba(100,170,230,0.5)', intake: '#2a5080',
+    centerLine: 'rgba(40,120,220,0.5)', finColor: '#1a4a80',
+    canopyTop: 'rgba(160,220,255,0.95)', canopyMid: 'rgba(80,180,255,0.8)',
+    canopyBottom: 'rgba(40,120,200,0.6)', canopyEdge: 'rgba(180,230,255,0.7)',
+    noseTip: 'rgba(100,200,255,0.7)', markOuter: 'rgba(255,255,255,0.5)',
+    markInner: 'rgba(50,120,220,0.8)', missileColor: '#3a6a9a'
+  },
+  { // LV2 - 시안/그린 강화
+    flameCore: 'rgb(50,255,200', flameRGB: '30,220,180', flameCoreRGB: '180,255,240',
+    nozzle: '#103828', wingTip: '#0a4a3a', wingMid: '#1a8a6a', wingRoot: '#28aa80',
+    wingEdge: 'rgba(60,230,180,0.45)', stabColor: '#105a45',
+    bodyEdge: '#105a45', bodyLight: '#90d8c8', bodyCenter: '#c8f0e8',
+    bodyStroke: 'rgba(60,210,170,0.5)', intake: '#186a50',
+    centerLine: 'rgba(40,200,160,0.5)', finColor: '#105a45',
+    canopyTop: 'rgba(140,255,220,0.95)', canopyMid: 'rgba(60,220,180,0.8)',
+    canopyBottom: 'rgba(30,150,120,0.6)', canopyEdge: 'rgba(160,255,230,0.7)',
+    noseTip: 'rgba(80,255,200,0.8)', markOuter: 'rgba(255,255,255,0.5)',
+    markInner: 'rgba(40,180,140,0.8)', missileColor: '#2a7a6a'
+  },
+  { // LV3 - 골드/앰버
+    flameCore: 'rgb(255,200,50', flameRGB: '255,170,30', flameCoreRGB: '255,240,180',
+    nozzle: '#3a2808', wingTip: '#5a3a08', wingMid: '#aa7a20', wingRoot: '#c89828',
+    wingEdge: 'rgba(255,200,60,0.5)', stabColor: '#6a4a10',
+    bodyEdge: '#6a4a10', bodyLight: '#e8c870', bodyCenter: '#f8e8a0',
+    bodyStroke: 'rgba(255,200,80,0.55)', intake: '#7a5a18',
+    centerLine: 'rgba(255,180,40,0.55)', finColor: '#6a4a10',
+    canopyTop: 'rgba(255,240,150,0.95)', canopyMid: 'rgba(255,200,60,0.85)',
+    canopyBottom: 'rgba(200,140,20,0.65)', canopyEdge: 'rgba(255,230,130,0.75)',
+    noseTip: 'rgba(255,220,80,0.85)', markOuter: 'rgba(255,255,255,0.6)',
+    markInner: 'rgba(220,170,30,0.85)', missileColor: '#8a6a20'
+  },
+  { // LV4 - 레드/오렌지 파이어
+    flameCore: 'rgb(255,120,30', flameRGB: '255,80,10', flameCoreRGB: '255,220,160',
+    nozzle: '#3a1008', wingTip: '#5a1808', wingMid: '#c04020', wingRoot: '#e05030',
+    wingEdge: 'rgba(255,100,40,0.55)', stabColor: '#6a2010',
+    bodyEdge: '#6a2010', bodyLight: '#e89070', bodyCenter: '#f8b8a0',
+    bodyStroke: 'rgba(255,100,50,0.55)', intake: '#7a2818',
+    centerLine: 'rgba(255,80,30,0.5)', finColor: '#6a2010',
+    canopyTop: 'rgba(255,200,120,0.95)', canopyMid: 'rgba(255,120,40,0.85)',
+    canopyBottom: 'rgba(200,60,10,0.65)', canopyEdge: 'rgba(255,180,100,0.75)',
+    noseTip: 'rgba(255,100,30,0.9)', markOuter: 'rgba(255,255,255,0.6)',
+    markInner: 'rgba(230,70,20,0.85)', missileColor: '#a04020'
+  },
+  { // LV5 MAX - 화이트/골드 레전더리
+    flameCore: 'rgb(255,255,150', flameRGB: '255,230,100', flameCoreRGB: '255,255,230',
+    nozzle: '#3a3020', wingTip: '#8a7030', wingMid: '#d0b050', wingRoot: '#e8d070',
+    wingEdge: 'rgba(255,240,120,0.6)', stabColor: '#8a7530',
+    bodyEdge: '#8a7530', bodyLight: '#f0e0b0', bodyCenter: '#fffff0',
+    bodyStroke: 'rgba(255,240,150,0.6)', intake: '#9a8540',
+    centerLine: 'rgba(255,230,100,0.6)', finColor: '#8a7530',
+    canopyTop: 'rgba(255,255,200,0.98)', canopyMid: 'rgba(255,240,120,0.9)',
+    canopyBottom: 'rgba(220,190,60,0.7)', canopyEdge: 'rgba(255,255,200,0.85)',
+    noseTip: 'rgba(255,255,180,0.95)', markOuter: 'rgba(255,255,255,0.7)',
+    markInner: 'rgba(240,210,60,0.9)', missileColor: '#b09040'
+  }
+];
 
 const ENEMY_BASIC_COLORS = {
   flameCore: 'rgb(255,100,40',
@@ -1012,25 +1050,76 @@ const ENEMY_BOSS_COLORS = {
 
 function drawPlayer() {
   const p = player;
+  const lv = p.weaponLevel;
   ctx.save();
   ctx.translate(p.x, p.y);
   ctx.rotate(p.tilt * 0.05);
 
+  // Jet grows slightly with each level
+  const sizeScale = 1 + (lv - 1) * 0.07;
+  const drawW = p.w * sizeScale;
+  const drawH = p.h * sizeScale;
+
   p.engineFlicker += 0.3;
   const flicker = Math.sin(p.engineFlicker) * 0.3 + 0.7;
 
-  drawJet(0, 0, p.w, p.h, -1, PLAYER_COLORS, flicker, {
-    twinFin: true,
+  const colors = PLAYER_LEVEL_COLORS[lv];
+
+  // Aura glow for LV3+
+  if (lv >= 3) {
+    const glowR = drawW * 1.6 + 10;
+    const auraAlpha = 0.06 + (lv - 3) * 0.04 + Math.sin(p.engineFlicker * 0.4) * 0.02;
+    const auraGrad = ctx.createRadialGradient(0, 0, drawW * 0.3, 0, 0, glowR);
+    auraGrad.addColorStop(0, colors.canopyMid.replace(/[\d.]+\)$/, auraAlpha * 2 + ')'));
+    auraGrad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = auraGrad;
+    ctx.beginPath();
+    ctx.arc(0, 0, glowR, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Energy ring for LV5
+  if (lv >= 5) {
+    const ringR = drawW * 1.3;
+    ctx.beginPath();
+    ctx.arc(0, 0, ringR, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(255,240,120,${0.15 + Math.sin(p.engineFlicker * 0.6) * 0.1})`;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // Orbiting particles effect
+    for (let i = 0; i < 3; i++) {
+      const a = p.engineFlicker * 0.3 + i * Math.PI * 2 / 3;
+      const ox = Math.cos(a) * ringR;
+      const oy = Math.sin(a) * ringR;
+      ctx.beginPath();
+      ctx.arc(ox, oy, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,200,${0.5 + Math.sin(p.engineFlicker + i) * 0.3})`;
+      ctx.fill();
+    }
+  }
+
+  drawJet(0, 0, drawW, drawH, -1, colors, flicker, {
+    twinFin: lv >= 2,
     marking: true,
-    missiles: true
+    missiles: lv >= 2
   });
+
+  // Level badge glow under the jet
+  if (lv >= 3) {
+    ctx.font = `bold ${9 + lv}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = colors.noseTip;
+    ctx.globalAlpha = 0.6 + Math.sin(p.engineFlicker * 0.5) * 0.2;
+    ctx.fillText('LV.' + (lv === 5 ? 'MAX' : lv), 0, drawH / 2 + 22 + (lv - 1) * 2);
+    ctx.globalAlpha = 1;
+  }
 
   // Shield when invincible
   if (p.invincible) {
     p.shieldPulse += 0.1;
     const shieldAlpha = 0.3 + Math.sin(p.shieldPulse) * 0.15;
     ctx.beginPath();
-    const sr = p.w * 1.4 + 10;
+    const sr = drawW * 1.4 + 12;
     for (let i = 0; i < 6; i++) {
       const a = i * Math.PI / 3 - Math.PI / 2 + p.shieldPulse * 0.2;
       const sx = Math.cos(a) * sr;
@@ -1116,16 +1205,28 @@ function drawEnemy(e) {
 function drawBullet(b) {
   ctx.save();
   ctx.translate(b.x, b.y);
+
+  // Bigger bullets get a glow trail
+  if (b.w >= 6) {
+    const trailGrad = ctx.createRadialGradient(0, 0, b.w * 0.3, 0, 0, b.w * 2.5);
+    trailGrad.addColorStop(0, b.color === '#fff' ? 'rgba(255,255,255,0.2)' : b.color.replace(')', ',0.15)').replace('rgb(', 'rgba(').replace('#', ''));
+    trailGrad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = trailGrad;
+    ctx.beginPath();
+    ctx.arc(0, 0, b.w * 2.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
   const grad = ctx.createLinearGradient(0, -b.h / 2, 0, b.h / 2);
   grad.addColorStop(0, '#fff');
-  grad.addColorStop(0.5, b.color);
+  grad.addColorStop(0.4, b.color);
   grad.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = grad;
   ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
 
   ctx.shadowColor = b.color;
-  ctx.shadowBlur = 8;
-  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.shadowBlur = b.w >= 7 ? 14 : 8;
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
   ctx.fillRect(-b.w / 4, -b.h / 2, b.w / 2, b.h / 3);
   ctx.shadowBlur = 0;
   ctx.restore();
@@ -1368,7 +1469,7 @@ function update(dt) {
           createExplosion(e.x, e.y, e.w);
           score += e.score;
           kills++;
-          if (Math.random() < 0.25) spawnItem(e.x, e.y);
+          if (Math.random() < 0.45) spawnItem(e.x, e.y);
           enemies.splice(j, 1);
           screenShake = Math.max(screenShake, 3);
           updateHUD();
@@ -1415,7 +1516,22 @@ function update(dt) {
         case 'weapon':
           if (player.weaponLevel < 5) {
             player.weaponLevel++;
-            showFloatingText(player.x, player.y - 40, WEAPONS[player.weaponLevel].name + '!', WEAPONS[player.weaponLevel].color);
+            const wc = PLAYER_LEVEL_COLORS[player.weaponLevel];
+            showFloatingText(player.x, player.y - 50, WEAPONS[player.weaponLevel].name + '!', WEAPONS[player.weaponLevel].color);
+            showFloatingText(player.x, player.y - 30, '화력 UP!', '#fff');
+            // Upgrade flash particles
+            for (let k = 0; k < 20; k++) {
+              const ang = Math.random() * Math.PI * 2;
+              const spd = Math.random() * 4 + 1.5;
+              particles.push({
+                x: player.x, y: player.y,
+                vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
+                life: 30 + Math.random() * 20, maxLife: 50,
+                size: Math.random() * 3 + 1.5,
+                color: WEAPONS[player.weaponLevel].color
+              });
+            }
+            screenShake = 4;
           } else {
             score += 500;
             showFloatingText(player.x, player.y - 40, '+500', '#ffd700');
