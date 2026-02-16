@@ -430,6 +430,7 @@ function createEnemy(type) {
       e.fireRate = 800; e.fireTimer = 0;
       e.movePattern = 'boss';
       e.x = W / 2;
+      e.bombHits = 0;
       break;
   }
   return e;
@@ -440,20 +441,32 @@ function spawnEnemies(dt) {
   if (enemySpawnTimer <= 0) {
     waveCount++;
     const roll = Math.random();
-    if (waveCount % 25 === 0) {
+    const extraCount = Math.min(Math.floor(difficulty / 2), 4);
+
+    if (waveCount % 20 === 0) {
       enemies.push(createEnemy('boss'));
-    } else if (roll < 0.4) {
-      enemies.push(createEnemy('basic'));
-      if (difficulty > 2) enemies.push(createEnemy('basic'));
-    } else if (roll < 0.6) {
-      enemies.push(createEnemy('fast'));
-    } else if (roll < 0.8) {
+      for (let i = 0; i < 2; i++) enemies.push(createEnemy('basic'));
+    } else if (roll < 0.35) {
+      const count = 2 + extraCount;
+      for (let i = 0; i < count; i++) enemies.push(createEnemy('basic'));
+    } else if (roll < 0.55) {
+      const count = 1 + Math.floor(extraCount * 0.7);
+      for (let i = 0; i < count; i++) enemies.push(createEnemy('fast'));
+    } else if (roll < 0.7) {
       enemies.push(createEnemy('tank'));
-    } else {
+      for (let i = 0; i < 1 + Math.floor(extraCount * 0.5); i++) enemies.push(createEnemy('basic'));
+    } else if (roll < 0.85) {
       enemies.push(createEnemy('shooter'));
+      if (difficulty > 1) enemies.push(createEnemy('basic'));
+      if (difficulty > 3) enemies.push(createEnemy('shooter'));
+    } else {
+      enemies.push(createEnemy('fast'));
+      enemies.push(createEnemy('fast'));
+      enemies.push(createEnemy('basic'));
+      if (difficulty > 2) enemies.push(createEnemy('shooter'));
     }
-    enemySpawnRate = Math.max(300, 1200 - difficulty * 80);
-    enemySpawnTimer = enemySpawnRate + Math.random() * 400;
+    enemySpawnRate = Math.max(200, 900 - difficulty * 70);
+    enemySpawnTimer = enemySpawnRate + Math.random() * 300;
   }
 }
 
@@ -484,12 +497,28 @@ function useBomb() {
   bombFlash = 1;
   screenShake = 15;
 
+  const surviving = [];
   enemies.forEach(e => {
-    createExplosion(e.x, e.y, e.w);
-    score += e.score;
-    kills++;
+    if (e.type === 'boss') {
+      e.bombHits = (e.bombHits || 0) + 1;
+      if (e.bombHits >= 2) {
+        createExplosion(e.x, e.y, e.w);
+        score += e.score;
+        kills++;
+        screenShake = 25;
+      } else {
+        e.hp = Math.ceil(e.maxHp * 0.35);
+        createExplosion(e.x, e.y, e.w * 0.6);
+        showFloatingText(e.x, e.y - e.h, '보스 생존! 폭탄 1회 더 필요!', '#ff4444');
+        surviving.push(e);
+      }
+    } else {
+      createExplosion(e.x, e.y, e.w);
+      score += e.score;
+      kills++;
+    }
   });
-  enemies = [];
+  enemies = surviving;
   enemyBullets = [];
 
   for (let i = 0; i < 60; i++) {
