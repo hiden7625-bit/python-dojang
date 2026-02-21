@@ -852,7 +852,7 @@ function drawJet(x, y, w, h, dir, colors, flicker, opts) {
 const PLAYER_LEVEL_COLORS = [
   null,
   { // LV1 - 기본 블루/실버
-    flameCore: 'rgb(80,180,255', flameRGB: '50,120,255', flameCoreRGB: '200,230,255',
+    flameCore: 'rgb(80,180,255)', flameRGB: '50,120,255', flameCoreRGB: '200,230,255',
     nozzle: '#1a3050', wingTip: '#15406a', wingMid: '#2a6aaa', wingRoot: '#3580c0',
     wingEdge: 'rgba(100,180,255,0.4)', stabColor: '#1a4a7a',
     bodyEdge: '#1a4a80', bodyLight: '#b0c8e0', bodyCenter: '#d8e8f4',
@@ -864,7 +864,7 @@ const PLAYER_LEVEL_COLORS = [
     markInner: 'rgba(50,120,220,0.8)', missileColor: '#3a6a9a'
   },
   { // LV2 - 시안/그린 강화
-    flameCore: 'rgb(50,255,200', flameRGB: '30,220,180', flameCoreRGB: '180,255,240',
+    flameCore: 'rgb(50,255,200)', flameRGB: '30,220,180', flameCoreRGB: '180,255,240',
     nozzle: '#103828', wingTip: '#0a4a3a', wingMid: '#1a8a6a', wingRoot: '#28aa80',
     wingEdge: 'rgba(60,230,180,0.45)', stabColor: '#105a45',
     bodyEdge: '#105a45', bodyLight: '#90d8c8', bodyCenter: '#c8f0e8',
@@ -876,7 +876,7 @@ const PLAYER_LEVEL_COLORS = [
     markInner: 'rgba(40,180,140,0.8)', missileColor: '#2a7a6a'
   },
   { // LV3 - 골드/앰버
-    flameCore: 'rgb(255,200,50', flameRGB: '255,170,30', flameCoreRGB: '255,240,180',
+    flameCore: 'rgb(255,200,50)', flameRGB: '255,170,30', flameCoreRGB: '255,240,180',
     nozzle: '#3a2808', wingTip: '#5a3a08', wingMid: '#aa7a20', wingRoot: '#c89828',
     wingEdge: 'rgba(255,200,60,0.5)', stabColor: '#6a4a10',
     bodyEdge: '#6a4a10', bodyLight: '#e8c870', bodyCenter: '#f8e8a0',
@@ -888,7 +888,7 @@ const PLAYER_LEVEL_COLORS = [
     markInner: 'rgba(220,170,30,0.85)', missileColor: '#8a6a20'
   },
   { // LV4 - 레드/오렌지 파이어
-    flameCore: 'rgb(255,120,30', flameRGB: '255,80,10', flameCoreRGB: '255,220,160',
+    flameCore: 'rgb(255,120,30)', flameRGB: '255,80,10', flameCoreRGB: '255,220,160',
     nozzle: '#3a1008', wingTip: '#5a1808', wingMid: '#c04020', wingRoot: '#e05030',
     wingEdge: 'rgba(255,100,40,0.55)', stabColor: '#6a2010',
     bodyEdge: '#6a2010', bodyLight: '#e89070', bodyCenter: '#f8b8a0',
@@ -900,7 +900,7 @@ const PLAYER_LEVEL_COLORS = [
     markInner: 'rgba(230,70,20,0.85)', missileColor: '#a04020'
   },
   { // LV5 MAX - 화이트/골드 레전더리
-    flameCore: 'rgb(255,255,150', flameRGB: '255,230,100', flameCoreRGB: '255,255,230',
+    flameCore: 'rgb(255,255,150)', flameRGB: '255,230,100', flameCoreRGB: '255,255,230',
     nozzle: '#3a3020', wingTip: '#8a7030', wingMid: '#d0b050', wingRoot: '#e8d070',
     wingEdge: 'rgba(255,240,120,0.6)', stabColor: '#8a7530',
     bodyEdge: '#8a7530', bodyLight: '#f0e0b0', bodyCenter: '#fffff0',
@@ -914,7 +914,7 @@ const PLAYER_LEVEL_COLORS = [
 ];
 
 const ENEMY_BASIC_COLORS = {
-  flameCore: 'rgb(255,100,40',
+  flameCore: 'rgb(255,100,40)',
   flameRGB: '255,70,20',
   flameCoreRGB: '255,200,120',
   nozzle: '#301010',
@@ -941,7 +941,7 @@ const ENEMY_BASIC_COLORS = {
 };
 
 const ENEMY_FAST_COLORS = {
-  flameCore: 'rgb(255,170,40',
+  flameCore: 'rgb(255,170,40)',
   flameRGB: '255,140,20',
   flameCoreRGB: '255,230,150',
   nozzle: '#302008',
@@ -968,7 +968,7 @@ const ENEMY_FAST_COLORS = {
 };
 
 const ENEMY_TANK_COLORS = {
-  flameCore: 'rgb(180,60,255',
+  flameCore: 'rgb(180,60,255)',
   flameRGB: '160,40,255',
   flameCoreRGB: '230,180,255',
   nozzle: '#150820',
@@ -995,7 +995,7 @@ const ENEMY_TANK_COLORS = {
 };
 
 const ENEMY_SHOOTER_COLORS = {
-  flameCore: 'rgb(80,255,80',
+  flameCore: 'rgb(80,255,80)',
   flameRGB: '60,220,60',
   flameCoreRGB: '180,255,180',
   nozzle: '#081508',
@@ -1022,7 +1022,7 @@ const ENEMY_SHOOTER_COLORS = {
 };
 
 const ENEMY_BOSS_COLORS = {
-  flameCore: 'rgb(255,60,20',
+  flameCore: 'rgb(255,60,20)',
   flameRGB: '255,40,10',
   flameCoreRGB: '255,180,100',
   nozzle: '#2a0808',
@@ -1202,6 +1202,23 @@ function drawEnemy(e) {
   ctx.restore();
 }
 
+function hexToRgba(hex, alpha) {
+  if (hex.startsWith('#')) {
+    let r, g, b;
+    if (hex.length === 4) {
+      r = parseInt(hex[1] + hex[1], 16);
+      g = parseInt(hex[2] + hex[2], 16);
+      b = parseInt(hex[3] + hex[3], 16);
+    } else {
+      r = parseInt(hex.substring(1, 3), 16);
+      g = parseInt(hex.substring(3, 5), 16);
+      b = parseInt(hex.substring(5, 7), 16);
+    }
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+  }
+  return hex.replace(')', ',' + alpha + ')').replace('rgb(', 'rgba(');
+}
+
 function drawBullet(b) {
   ctx.save();
   ctx.translate(b.x, b.y);
@@ -1209,7 +1226,7 @@ function drawBullet(b) {
   // Bigger bullets get a glow trail
   if (b.w >= 6) {
     const trailGrad = ctx.createRadialGradient(0, 0, b.w * 0.3, 0, 0, b.w * 2.5);
-    trailGrad.addColorStop(0, b.color === '#fff' ? 'rgba(255,255,255,0.2)' : b.color.replace(')', ',0.15)').replace('rgb(', 'rgba(').replace('#', ''));
+    trailGrad.addColorStop(0, hexToRgba(b.color, 0.15));
     trailGrad.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = trailGrad;
     ctx.beginPath();
