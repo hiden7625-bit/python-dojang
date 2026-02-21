@@ -162,17 +162,41 @@ body {
   border-color: rgba(255,80,80,0.4);
   font-size: 22px;
 }
-.dpad {
-  display: grid;
-  grid-template-columns: 56px 56px 56px;
-  grid-template-rows: 56px 56px 56px;
-  gap: 4px;
+#joystick-area {
+  width: 150px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.dpad .mobile-btn { width: 56px; height: 56px; font-size: 22px; }
-.dpad-up { grid-column: 2; grid-row: 1; }
-.dpad-down { grid-column: 2; grid-row: 3; }
-.dpad-left { grid-column: 1; grid-row: 2; }
-.dpad-right { grid-column: 3; grid-row: 2; }
+#joystick-base {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 2px solid rgba(255,255,255,0.2);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#joystick-knob {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 38%, rgba(255,255,255,0.35), rgba(255,255,255,0.12));
+  border: 2px solid rgba(255,255,255,0.4);
+  position: absolute;
+  pointer-events: none;
+}
+#joystick-base::after {
+  content: '+';
+  position: absolute;
+  color: rgba(255,255,255,0.1);
+  font-size: 40px;
+  font-weight: 300;
+  pointer-events: none;
+}
 .hidden { display: none !important; }
 @media (pointer: coarse) {
   #mobile-controls { display: flex; }
@@ -221,11 +245,10 @@ body {
   <div style="display:flex;gap:12px;align-items:flex-end;">
     <div class="mobile-btn bomb-btn" id="mobile-bomb">💣</div>
   </div>
-  <div class="dpad">
-    <div class="mobile-btn dpad-up" data-dir="up">▲</div>
-    <div class="mobile-btn dpad-left" data-dir="left">◀</div>
-    <div class="mobile-btn dpad-right" data-dir="right">▶</div>
-    <div class="mobile-btn dpad-down" data-dir="down">▼</div>
+  <div id="joystick-area">
+    <div id="joystick-base">
+      <div id="joystick-knob"></div>
+    </div>
   </div>
 </div>
 
@@ -257,16 +280,53 @@ const keys = {};
 window.addEventListener('keydown', e => { keys[e.code] = true; if (['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) e.preventDefault(); });
 window.addEventListener('keyup', e => { keys[e.code] = false; });
 
-// Mobile input
-const mobileDir = { up: false, down: false, left: false, right: false };
-document.querySelectorAll('.dpad .mobile-btn').forEach(btn => {
-  const dir = btn.dataset.dir;
-  const start = () => { mobileDir[dir] = true; };
-  const end = () => { mobileDir[dir] = false; };
-  btn.addEventListener('touchstart', e => { e.preventDefault(); start(); });
-  btn.addEventListener('touchend', e => { e.preventDefault(); end(); });
-  btn.addEventListener('touchcancel', e => { end(); });
+// Mobile input - Virtual Joystick
+const joystickInput = { x: 0, y: 0 };
+const joystickBase = document.getElementById('joystick-base');
+const joystickKnob = document.getElementById('joystick-knob');
+let joystickTouchId = null;
+
+function updateJoystick(touch) {
+  const rect = joystickBase.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const maxDist = rect.width / 2 - 27;
+  let dx = touch.clientX - cx;
+  let dy = touch.clientY - cy;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  if (dist > maxDist) {
+    dx = dx / dist * maxDist;
+    dy = dy / dist * maxDist;
+  }
+  joystickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+  joystickInput.x = dx / maxDist;
+  joystickInput.y = dy / maxDist;
+}
+
+function resetJoystick() {
+  joystickKnob.style.transform = 'translate(0, 0)';
+  joystickInput.x = 0;
+  joystickInput.y = 0;
+  joystickTouchId = null;
+}
+
+joystickBase.addEventListener('touchstart', e => {
+  e.preventDefault();
+  joystickTouchId = e.changedTouches[0].identifier;
+  updateJoystick(e.changedTouches[0]);
 });
+joystickBase.addEventListener('touchmove', e => {
+  e.preventDefault();
+  for (let i = 0; i < e.changedTouches.length; i++) {
+    if (e.changedTouches[i].identifier === joystickTouchId) {
+      updateJoystick(e.changedTouches[i]);
+      break;
+    }
+  }
+});
+joystickBase.addEventListener('touchend', e => { e.preventDefault(); resetJoystick(); });
+joystickBase.addEventListener('touchcancel', e => { resetJoystick(); });
+
 document.getElementById('mobile-bomb').addEventListener('touchstart', e => { e.preventDefault(); useBomb(); });
 
 // Stars background
@@ -1373,13 +1433,19 @@ function update(dt) {
 
   // Player movement
   let dx = 0, dy = 0;
-  if (keys['ArrowLeft'] || keys['KeyA'] || mobileDir.left) dx = -1;
-  if (keys['ArrowRight'] || keys['KeyD'] || mobileDir.right) dx = 1;
-  if (keys['ArrowUp'] || keys['KeyW'] || mobileDir.up) dy = -1;
-  if (keys['ArrowDown'] || keys['KeyS'] || mobileDir.down) dy = 1;
+  if (keys['ArrowLeft'] || keys['KeyA']) dx = -1;
+  if (keys['ArrowRight'] || keys['KeyD']) dx = 1;
+  if (keys['ArrowUp'] || keys['KeyW']) dy = -1;
+  if (keys['ArrowDown'] || keys['KeyS']) dy = 1;
 
   if (dx !== 0 && dy !== 0) {
     dx *= 0.707; dy *= 0.707;
+  }
+
+  // Joystick analog input (overrides keyboard if active)
+  if (Math.abs(joystickInput.x) > 0.15 || Math.abs(joystickInput.y) > 0.15) {
+    dx = joystickInput.x;
+    dy = joystickInput.y;
   }
 
   player.x += dx * player.speed * (dt / 16);
@@ -1486,7 +1552,7 @@ function update(dt) {
           createExplosion(e.x, e.y, e.w);
           score += e.score;
           kills++;
-          if (Math.random() < 0.15) spawnItem(e.x, e.y);
+          if (Math.random() < 0.075) spawnItem(e.x, e.y);
           enemies.splice(j, 1);
           screenShake = Math.max(screenShake, 3);
           updateHUD();
